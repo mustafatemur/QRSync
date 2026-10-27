@@ -8,8 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- QRCode.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <!-- MQTT.js -->
-    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <!-- MQTT.js (Daha stabil CDN ile güncellendi) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/4.3.7/mqtt.min.js"></script>
     <style>
         body { font-family: 'Inter', sans-serif; }
         .glass-panel {
@@ -27,7 +27,7 @@
             color: #1f2937;
             border-bottom-left-radius: 0;
         }
-        /* Özel kaydırma çubuğu (Scrollbar) */
+        /* Özel kaydırma çubuğu */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
@@ -44,9 +44,9 @@
         <h1 class="text-3xl font-bold text-gray-800 mb-2">QRSync</h1>
         <p class="text-gray-500 text-sm mb-8">İki cihaz arasında şifrelenmiş, onaylı ve karşılıklı iletişim kurun.</p>
         
-        <button id="btn-create-room" class="w-full mb-6 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold py-3 px-4 rounded-xl shadow-lg transform transition active:scale-95 flex justify-center items-center">
+        <button id="btn-create-room" class="w-full mb-6 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold py-3 px-4 rounded-xl shadow-lg transform transition active:scale-95 flex justify-center items-center disabled:opacity-75 disabled:cursor-not-allowed">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-            Yeni Oda Kur
+            <span>Yeni Oda Kur</span>
         </button>
 
         <div class="relative flex py-3 items-center">
@@ -57,7 +57,7 @@
 
         <div class="mt-4 space-y-3">
             <input type="text" id="input-join-code" maxlength="6" class="w-full px-4 py-3 text-center text-2xl tracking-widest font-mono rounded-xl border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition uppercase" placeholder="______">
-            <button id="btn-join-room" class="w-full bg-white border-2 border-indigo-500 text-indigo-600 hover:bg-indigo-50 font-bold py-3 px-4 rounded-xl shadow-sm transform transition active:scale-95">
+            <button id="btn-join-room" class="w-full bg-white border-2 border-indigo-500 text-indigo-600 hover:bg-indigo-50 font-bold py-3 px-4 rounded-xl shadow-sm transform transition active:scale-95 disabled:opacity-75 disabled:cursor-not-allowed">
                 Odaya Katıl
             </button>
         </div>
@@ -90,7 +90,6 @@
 
     <!-- SOHBET EKRANI -->
     <div id="view-chat" class="hidden w-full max-w-2xl h-[80vh] flex flex-col glass-panel rounded-3xl shadow-2xl overflow-hidden transition-all duration-300">
-        <!-- Header -->
         <div class="bg-white px-6 py-4 border-b flex justify-between items-center shadow-sm z-10">
             <div class="flex items-center space-x-3">
                 <div class="w-3 h-3 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]"></div>
@@ -104,14 +103,12 @@
             </button>
         </div>
 
-        <!-- Mesaj Alanı -->
         <div id="chat-messages" class="flex-1 p-6 overflow-y-auto bg-gray-50/50 space-y-4 flex flex-col">
             <div class="text-center w-full">
                 <span class="bg-gray-200 text-gray-600 text-xs px-3 py-1 rounded-full">Bağlantı kuruldu. Mesajlar uçtan uca olmasa da izole iletilir.</span>
             </div>
         </div>
 
-        <!-- Mesaj Gönderme Alanı -->
         <div class="bg-white p-4 border-t">
             <form id="form-chat" class="flex space-x-2">
                 <input type="text" id="input-chat" class="flex-1 px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition" placeholder="Mesajınızı veya barkod verisini yazın..." autocomplete="off">
@@ -122,7 +119,7 @@
         </div>
     </div>
 
-    <!-- ONAY MODALI (Custom Alert/Confirm yerine) -->
+    <!-- ONAY MODALI -->
     <div id="modal-approval" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50 p-4 opacity-0 transition-opacity duration-300">
         <div class="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl transform scale-95 transition-transform duration-300" id="modal-content">
             <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-600">
@@ -138,14 +135,12 @@
     </div>
 
     <!-- HATA/BİLGİ TOAST MESAJI -->
-    <div id="toast" class="fixed bottom-4 right-4 bg-gray-800 text-white px-6 py-3 rounded-xl shadow-2xl transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center">
+    <div id="toast" class="fixed bottom-4 right-4 bg-gray-800 text-white px-6 py-3 rounded-xl shadow-2xl transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center pointer-events-none">
         <span id="toast-msg">Hata oluştu.</span>
     </div>
 
     <script>
-        // --- GÜVENLİK VE YARDIMCI FONKSİYONLAR ---
-        
-        // 1. XSS (Cross-Site Scripting) Koruması: Kullanıcı girdilerindeki tehlikeli HTML etiketlerini temizler.
+        // Güvenlik: Zararlı karakterleri temizle
         function escapeHTML(str) {
             if (typeof str !== 'string') return '';
             return str.replace(/[&<>'"]/g, tag => ({
@@ -153,11 +148,10 @@
             }[tag]));
         }
 
-        // 2. Rastgele güvenli kod oluşturucu (Örn: A8K9X2)
+        // Güvenli rastgele oturum kodu oluştur
         function generateSecureCode() {
             const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             let result = '';
-            // Daha güvenli rastgele sayı üretimi (Mümkünse crypto API kullanarak)
             if (window.crypto && window.crypto.getRandomValues) {
                 const values = new Uint32Array(6);
                 window.crypto.getRandomValues(values);
@@ -172,16 +166,14 @@
             return result;
         }
 
-        // Toast Mesajı Gösterme
         function showToast(message, isError = false) {
             const toast = document.getElementById('toast');
             document.getElementById('toast-msg').innerText = message;
             toast.style.backgroundColor = isError ? '#ef4444' : '#374151';
             toast.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3000);
+            setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 4500);
         }
 
-        // Görünüm Değiştirme
         function switchView(viewId) {
             ['view-home', 'view-waiting', 'view-chat'].forEach(id => {
                 document.getElementById(id).classList.add('hidden');
@@ -189,62 +181,87 @@
             document.getElementById(viewId).classList.remove('hidden');
         }
 
-        // --- UYGULAMA DURUMU (STATE) ---
         const AppState = {
             clientId: 'client_' + Math.random().toString(16).slice(2),
             sessionId: null,
-            role: null, // 'host' veya 'guest'
+            role: null,
             mqttClient: null,
             topicSystem: '',
             topicChat: '',
             guestWaitingId: null
         };
 
-        // --- MQTT VE İLETİŞİM MANTIĞI ---
-        
-        function connectMQTT(onConnected) {
-            if (AppState.mqttClient && AppState.mqttClient.connected) {
-                if(onConnected) onConnected();
+        // GÜNCELLENDİ: Hata Yönetimli MQTT Bağlantı Fonksiyonu
+        function connectMQTT(callback) {
+            if (typeof mqtt === 'undefined') {
+                callback(false, "Sistem kütüphaneleri yüklenemedi. Lütfen sayfayı yenileyin.");
                 return;
             }
-            // HiveMQ Açık Test Sunucusu
+
+            if (AppState.mqttClient && AppState.mqttClient.connected) {
+                callback(true);
+                return;
+            }
+            
+            if (AppState.mqttClient) AppState.mqttClient.end();
+
             const brokerUrl = 'wss://broker.hivemq.com:8443/mqtt';
-            AppState.mqttClient = mqtt.connect(brokerUrl);
+            let isResolved = false;
+            
+            try {
+                // Zaman aşımı ve otomatik yeniden bağlanma ayarları (Sonsuz döngüyü engeller)
+                AppState.mqttClient = mqtt.connect(brokerUrl, {
+                    connectTimeout: 5000,
+                    reconnectPeriod: 0 
+                });
 
-            AppState.mqttClient.on('connect', () => {
-                console.log("MQTT Bağlantısı Başarılı");
-                if(onConnected) onConnected();
-            });
+                AppState.mqttClient.on('connect', () => {
+                    if (!isResolved) {
+                        isResolved = true;
+                        AppState.mqttClient.on('message', handleIncomingMessage);
+                        callback(true);
+                    }
+                });
 
-            AppState.mqttClient.on('message', handleIncomingMessage);
+                AppState.mqttClient.on('error', (err) => {
+                    if (!isResolved) {
+                        isResolved = true;
+                        callback(false, "Bağlantı reddedildi. Ağınız güvenlik portunu engelliyor olabilir.");
+                        AppState.mqttClient.end();
+                    }
+                });
 
-            AppState.mqttClient.on('error', (err) => {
-                showToast("Sunucu bağlantı hatası!", true);
-                console.error(err);
-            });
+                // SESSİZ HATA GİDERİCİ: Mobil ağ portu engellerse bağlantı havada kalır. (Timeout çözümü)
+                setTimeout(() => {
+                    if (!isResolved) {
+                        isResolved = true;
+                        callback(false, "Sunucuya ulaşılamadı (Zaman Aşımı). Güvenli ağ portu engellenmiş olabilir.");
+                        AppState.mqttClient.end();
+                    }
+                }, 6000);
+
+            } catch (error) {
+                if (!isResolved) {
+                    isResolved = true;
+                    callback(false, "Bağlantı başlatılamadı: " + error.message);
+                }
+            }
         }
 
         function handleIncomingMessage(topic, message) {
             let data;
             try {
-                // Güvenlik: Gelen verinin geçerli bir JSON olduğunu doğruluyoruz.
                 data = JSON.parse(message.toString());
-            } catch (e) {
-                return; // Geçersiz veri formatı, yok say.
-            }
+            } catch (e) { return; }
 
-            // Kendi gönderdiğimiz mesajları sistemden dışlıyoruz (Chat hariç)
             if (data.senderId === AppState.clientId && data.type !== 'chat') return;
 
-            // SİSTEM MESAJLARI (Onaylar, İstekler)
             if (topic === AppState.topicSystem) {
                 if (AppState.role === 'host' && data.type === 'join_request') {
-                    // Host isek ve biri katılmak istiyorsa Modalı Aç
                     AppState.guestWaitingId = data.senderId;
                     showApprovalModal();
                 } 
                 else if (AppState.role === 'guest' && data.type === 'join_response' && data.targetId === AppState.clientId) {
-                    // Guest isek ve cevabımız geldiyse
                     if (data.status === 'accepted') {
                         showToast("Bağlantı Onaylandı!");
                         startChat();
@@ -258,7 +275,6 @@
                     resetApp();
                 }
             }
-            // SOHBET MESAJLARI
             else if (topic === AppState.topicChat && data.type === 'chat') {
                 if (data.senderId !== AppState.clientId) {
                     renderMessage(data.text, 'other');
@@ -266,83 +282,100 @@
             }
         }
 
-        // --- ARAYÜZ (UI) ETKİLEŞİMLERİ ---
-
         document.addEventListener('DOMContentLoaded', () => {
-            // URL'de session varsa direkt katılma moduna geç
             const urlParams = new URLSearchParams(window.location.search);
             const sessionFromUrl = urlParams.get('session');
             if (sessionFromUrl) {
                 document.getElementById('input-join-code').value = sessionFromUrl;
             }
 
-            // ODA KURMA (HOST)
-            document.getElementById('btn-create-room').addEventListener('click', () => {
-                connectMQTT(() => {
+            // ODA KURMA
+            const btnCreate = document.getElementById('btn-create-room');
+            btnCreate.addEventListener('click', () => {
+                const originalContent = btnCreate.innerHTML;
+                btnCreate.innerHTML = '<span class="animate-pulse">Bağlanılıyor...</span>';
+                btnCreate.disabled = true;
+
+                connectMQTT((success, errorMsg) => {
+                    btnCreate.innerHTML = originalContent;
+                    btnCreate.disabled = false;
+
+                    if (!success) {
+                        showToast(errorMsg, true);
+                        return;
+                    }
+
                     AppState.role = 'host';
                     AppState.sessionId = generateSecureCode();
                     AppState.topicSystem = `secureqr/sys/${AppState.sessionId}`;
                     AppState.topicChat = `secureqr/chat/${AppState.sessionId}`;
 
-                    // Sisteme abone ol (katılma isteklerini dinle)
                     AppState.mqttClient.subscribe(AppState.topicSystem);
 
                     document.getElementById('display-session-code').innerText = AppState.sessionId;
                     
-                    // QR Kod Oluşturma
                     let currentUrl = window.location.href.split('?')[0];
                     let connectUrl = `${currentUrl}?session=${AppState.sessionId}`;
                     const qrContainer = document.getElementById("qrcode");
-                    qrContainer.innerHTML = ''; // Temizle
+                    qrContainer.innerHTML = '';
                     try {
                         new QRCode(qrContainer, {
                             text: connectUrl, width: 180, height: 180,
                             colorDark : "#1e1b4b", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H
                         });
-                    } catch(e) { console.error("QR Oluşturulamadı", e); }
+                    } catch(e) { console.error("QR Hatası", e); }
 
                     document.getElementById('chat-role-text').innerText = "Oda Kurucusu";
                     switchView('view-waiting');
                 });
             });
 
-            // ODAYA KATILMA (GUEST)
-            document.getElementById('btn-join-room').addEventListener('click', () => {
+            // ODAYA KATILMA
+            const btnJoin = document.getElementById('btn-join-room');
+            btnJoin.addEventListener('click', () => {
                 const code = document.getElementById('input-join-code').value.trim().toUpperCase();
                 if (code.length !== 6) {
                     showToast("Lütfen 6 haneli geçerli bir kod girin.", true);
                     return;
                 }
 
-                document.getElementById('btn-join-room').innerText = "Bağlanılıyor...";
+                const originalText = btnJoin.innerText;
+                btnJoin.innerText = "Bağlanılıyor...";
+                btnJoin.disabled = true;
                 
-                connectMQTT(() => {
+                connectMQTT((success, errorMsg) => {
+                    if (!success) {
+                        btnJoin.innerText = originalText;
+                        btnJoin.disabled = false;
+                        showToast(errorMsg, true);
+                        return;
+                    }
+
                     AppState.role = 'guest';
                     AppState.sessionId = code;
                     AppState.topicSystem = `secureqr/sys/${AppState.sessionId}`;
                     AppState.topicChat = `secureqr/chat/${AppState.sessionId}`;
 
-                    // Önce sisteme abone ol ki cevabı alabilesin
                     AppState.mqttClient.subscribe(AppState.topicSystem, (err) => {
+                        btnJoin.innerText = originalText;
+                        btnJoin.disabled = false;
                         if(!err) {
-                            // Onay isteği gönder
                             const req = { type: 'join_request', senderId: AppState.clientId };
                             AppState.mqttClient.publish(AppState.topicSystem, JSON.stringify(req));
-                            showToast("Bağlantı isteği gönderildi, onay bekleniyor...");
+                            showToast("İstek gönderildi, onay bekleniyor...");
+                        } else {
+                            showToast("Odaya ulaşılamadı.", true);
                         }
                     });
                 });
             });
 
-            // BEKLEMEYİ İPTAL ET
             document.getElementById('btn-cancel-waiting').addEventListener('click', resetApp);
             
-            // LİNKİ KOPYALA
             document.getElementById('btn-copy-link').addEventListener('click', () => {
                 let currentUrl = window.location.href.split('?')[0];
                 let connectUrl = `${currentUrl}?session=${AppState.sessionId}`;
                 
-                // Modern panoya kopyalama API'si (Eski tarayıcılar için fallback eklendi)
                 if (navigator.clipboard && window.isSecureContext) {
                     navigator.clipboard.writeText(connectUrl).then(() => {
                         showToast("Bağlantı linki kopyalandı!");
@@ -362,7 +395,6 @@
                 }
             });
 
-            // SOHBETTEN ÇIK
             document.getElementById('btn-leave-chat').addEventListener('click', () => {
                 if (AppState.mqttClient) {
                     AppState.mqttClient.publish(AppState.topicSystem, JSON.stringify({ type: 'leave', senderId: AppState.clientId }));
@@ -370,7 +402,6 @@
                 resetApp();
             });
 
-            // MESAJ GÖNDERME
             document.getElementById('form-chat').addEventListener('submit', (e) => {
                 e.preventDefault();
                 const input = document.getElementById('input-chat');
@@ -380,13 +411,11 @@
                     const msgObj = { type: 'chat', senderId: AppState.clientId, text: text };
                     AppState.mqttClient.publish(AppState.topicChat, JSON.stringify(msgObj));
                     
-                    // Kendimize ekranda gösterelim
                     renderMessage(text, 'me');
                     input.value = '';
                 }
             });
 
-            // ONAY MODALI BUTONLARI
             document.getElementById('btn-approve').addEventListener('click', () => {
                 respondToJoinRequest('accepted');
                 closeApprovalModal();
@@ -400,15 +429,12 @@
             });
         });
 
-        // --- YARDIMCI GÖRÜNÜM FONKSİYONLARI ---
-
         function respondToJoinRequest(status) {
             const res = { type: 'join_response', senderId: AppState.clientId, targetId: AppState.guestWaitingId, status: status };
             AppState.mqttClient.publish(AppState.topicSystem, JSON.stringify(res));
         }
 
         function startChat() {
-            // Chat kanalına abone ol
             AppState.mqttClient.subscribe(AppState.topicChat);
             if(AppState.role === 'guest') {
                 document.getElementById('chat-role-text').innerText = "Katılımcı";
@@ -432,34 +458,26 @@
             switchView('view-home');
         }
 
-        // Ekrana mesaj basma (Güvenli yöntem)
         function renderMessage(text, senderType) {
             const container = document.getElementById('chat-messages');
             const wrapperDiv = document.createElement('div');
             const msgDiv = document.createElement('div');
             
-            // XSS Taraması/Koruması - Zararlı kodları pasifleştirir
             const safeText = escapeHTML(text);
             
             wrapperDiv.className = `flex w-full ${senderType === 'me' ? 'justify-end' : 'justify-start'}`;
             msgDiv.className = `max-w-[75%] px-4 py-3 rounded-2xl text-sm shadow-sm break-words ${senderType === 'me' ? 'chat-bubble-me' : 'chat-bubble-other'}`;
-            
-            // Doğrudan innerHTML yerine text olarak atama yapıyoruz (Ekstra Güvenlik)
-            msgDiv.innerHTML = safeText; // Escape edildiği için innerHTML güvenlidir, veya msgDiv.textContent = text; kullanılabilir.
+            msgDiv.innerHTML = safeText;
             
             wrapperDiv.appendChild(msgDiv);
             container.appendChild(wrapperDiv);
-            
-            // En alta kaydır
             container.scrollTop = container.scrollHeight;
         }
 
-        // Modal Yönetimi
         function showApprovalModal() {
             const modal = document.getElementById('modal-approval');
             const content = document.getElementById('modal-content');
             modal.classList.remove('hidden');
-            // Animasyon için kısa gecikme
             setTimeout(() => {
                 modal.classList.remove('opacity-0');
                 content.classList.remove('scale-95');
