@@ -88,7 +88,7 @@
             <span class="text-yellow-600 font-medium text-sm">Waiting for request...</span>
         </div>
 
-        <!-- NEW: Embedded Room Permission Area for Mobile -->
+        <!-- Embedded Room Permission Area for Mobile -->
         <div id="area-room-permission" class="hidden bg-indigo-50 border border-indigo-100 rounded-2xl p-5 mb-6 shadow-sm w-full transition-all duration-300 transform scale-95 opacity-0">
             <div class="flex items-center justify-center mb-4">
                 <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 mr-3">
@@ -131,7 +131,6 @@
 
         <div class="bg-white p-4 border-t">
             <form id="form-chat" class="flex space-x-2">
-                <!-- SECURITY: Max length to prevent DoS via massive payload injection -->
                 <input type="text" id="input-chat" maxlength="2000" class="flex-1 px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition" placeholder="Type your message or barcode data..." autocomplete="off">
                 <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl px-6 font-bold shadow-md transition transform active:scale-95 flex items-center justify-center">
                     <svg class="w-5 h-5 transform rotate-90" fill="currentColor" viewBox="0 0 20 20"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path></svg>
@@ -140,19 +139,17 @@
         </div>
     </div>
 
-    <!-- (REMOVED: Old APPROVAL MODAL block completely deleted from here) -->
-
     <!-- NOTIFICATION TOAST -->
     <div id="toast" class="fixed bottom-4 right-4 bg-gray-800 text-white px-6 py-3 rounded-xl shadow-2xl transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center pointer-events-none">
         <span id="toast-msg">Error occurred.</span>
     </div>
 
     <script>
-        // SECURITY: Generate a cryptographically secure random session code
+        // Use HiveMQ as Primary (Index 0) for better stability, then EMQX, then Mosquitto
         function generateSecureCode(brokerIndex) {
             const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            const brokerPrefixes = ['E', 'H', 'M'];
-            let result = brokerPrefixes[brokerIndex] || 'E'; // First character strictly routes to the correct broker
+            const brokerPrefixes = ['H', 'E', 'M'];
+            let result = brokerPrefixes[brokerIndex] || 'H';
             
             if (window.crypto && window.crypto.getRandomValues) {
                 const values = new Uint32Array(6);
@@ -183,7 +180,6 @@
             document.getElementById(viewId).classList.remove('hidden');
         }
 
-        // Session Recovery mechanism
         const savedState = sessionStorage.getItem('qrsync_state');
         const defaultState = {
             clientId: 'client_' + Math.random().toString(16).slice(2),
@@ -196,7 +192,6 @@
             { ...defaultState, ...JSON.parse(savedState), mqttClient: null, topicSystem: '', topicChat: '', guestWaitingId: null } : 
             { ...defaultState, mqttClient: null, topicSystem: '', topicChat: '', guestWaitingId: null };
 
-        // Save state securely to sessionStorage (cleared when tab closes)
         function saveState() {
             sessionStorage.setItem('qrsync_state', JSON.stringify({
                 clientId: AppState.clientId,
@@ -216,13 +211,12 @@
                     text: connectUrl, width: 180, height: 180,
                     colorDark : "#1e1b4b", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H
                 });
-            } catch(e) { console.error("QR Generation Error", e); }
+            } catch(e) { console.error("QR Gen Error", e); }
         }
 
-        // MQTT Connection with Multiple Brokers Fallback
         function connectMQTT(callback, forcedBrokerIndex = null) {
             if (typeof mqtt === 'undefined') {
-                callback(false, "System libraries failed to load. Please refresh the page.");
+                callback(false, "System libraries failed to load. Please refresh.");
                 return;
             }
 
@@ -233,10 +227,10 @@
             
             if (AppState.mqttClient) AppState.mqttClient.end();
 
-            // Fallback public brokers to bypass cellular network port blocking
+            // Reordered for better mobile stability (HiveMQ as primary)
             const brokers = [
-                'wss://broker.emqx.io:8084/mqtt',      // E: Index 0
-                'wss://broker.hivemq.com:8443/mqtt',   // H: Index 1
+                'wss://broker.hivemq.com:8443/mqtt',   // H: Index 0
+                'wss://broker.emqx.io:8084/mqtt',      // E: Index 1
                 'wss://test.mosquitto.org:8081/mqtt'   // M: Index 2
             ];
             
@@ -255,7 +249,7 @@
                 if (brokerIndex >= brokers.length) {
                     if (!isResolved) {
                         isResolved = true;
-                        callback(false, "Could not reach any server. Your network might be blocking WebSockets.");
+                        callback(false, "Could not reach any server. Network might be blocking WebSockets.");
                     }
                     return;
                 }
@@ -264,19 +258,19 @@
                 
                 try {
                     const client = mqtt.connect(brokerUrl, {
-                        connectTimeout: 4000, 
-                        reconnectPeriod: 0    
+                        connectTimeout: 5000, 
+                        reconnectPeriod: 2000, // IMPORTANT: Auto-reconnect enabled for mobile browsers
+                        keepalive: 30
                     });
 
+                    // Initial connection timeout fallback
                     let timeoutTimer = setTimeout(() => {
-                        if (!client.connected) {
+                        if (!client.connected && !isResolved) {
                             client.end();
-                            if(!isResolved) {
-                                brokerIndex++;
-                                tryConnect(); 
-                            }
+                            brokerIndex++;
+                            tryConnect(); 
                         }
-                    }, 4500);
+                    }, 5500);
 
                     client.on('connect', () => {
                         clearTimeout(timeoutTimer);
@@ -289,40 +283,39 @@
                     });
 
                     client.on('error', (err) => {
-                        clearTimeout(timeoutTimer);
-                        client.end();
-                        if (!client.connected && !isResolved) {
+                        // Only fallback if initial connection fails. If it fails later, reconnectPeriod handles it.
+                        if (!isResolved) {
+                            clearTimeout(timeoutTimer);
+                            client.end();
                             brokerIndex++;
                             tryConnect(); 
                         }
                     });
 
                 } catch (error) {
-                    brokerIndex++;
-                    tryConnect(); 
+                    if (!isResolved) {
+                        brokerIndex++;
+                        tryConnect(); 
+                    }
                 }
             }
 
             tryConnect();
         }
 
-        // SECURITY: Strict Schema Validation & Type Checking for Incoming Messages
         function handleIncomingMessage(topic, message) {
             let data;
             try {
                 data = JSON.parse(message.toString());
-                
-                // Validate schema to prevent prototype pollution and injection
                 if (!data || typeof data !== 'object') return;
                 if (typeof data.type !== 'string' || typeof data.senderId !== 'string') return;
                 
-                // Enforce max payload size to prevent memory DoS attacks
                 if (data.text && typeof data.text === 'string') {
                     if (data.text.length > 2000) data.text = data.text.substring(0, 2000);
                 } else if (data.text) {
-                    return; // Drop if text is provided but not a string (e.g. object/array injection)
+                    return; 
                 }
-            } catch (e) { return; } // Drop malformed JSON silently
+            } catch (e) { return; } 
 
             if (data.senderId === AppState.clientId && data.type !== 'chat') return;
 
@@ -353,12 +346,11 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Auto-recover session on page refresh
             if (AppState.sessionId && AppState.role) {
                 AppState.topicSystem = `secureqr/sys/${AppState.sessionId}`;
                 AppState.topicChat = `secureqr/chat/${AppState.sessionId}`;
                 
-                let bIndex = ['E', 'H', 'M'].indexOf(AppState.sessionId.charAt(0));
+                let bIndex = ['H', 'E', 'M'].indexOf(AppState.sessionId.charAt(0));
                 if (bIndex === -1) bIndex = 0;
 
                 if (AppState.role === 'host') {
@@ -374,13 +366,14 @@
 
                 connectMQTT((success, errorMsg) => {
                     if (success) {
-                        AppState.mqttClient.subscribe(AppState.topicSystem, { qos: 1 });
+                        // Switched to QoS: 0 to prevent public brokers from dropping packets
+                        AppState.mqttClient.subscribe(AppState.topicSystem, { qos: 0 });
                         if (AppState.isChatActive) {
-                            AppState.mqttClient.subscribe(AppState.topicChat, { qos: 1 });
+                            AppState.mqttClient.subscribe(AppState.topicChat, { qos: 0 });
                             showToast("Connection successfully recovered.");
                         } else if (AppState.role === 'guest') {
                             const req = { type: 'join_request', senderId: AppState.clientId };
-                            AppState.mqttClient.publish(AppState.topicSystem, JSON.stringify(req), { qos: 1 });
+                            AppState.mqttClient.publish(AppState.topicSystem, JSON.stringify(req), { qos: 0 });
                         }
                     } else {
                         showToast("Failed to recover connection: " + errorMsg, true);
@@ -388,7 +381,6 @@
                     }
                 }, bIndex);
             } else {
-                // Auto-join if opened via QR Code scan
                 const urlParams = new URLSearchParams(window.location.search);
                 const sessionFromUrl = urlParams.get('session');
                 if (sessionFromUrl) {
@@ -399,7 +391,6 @@
                 }
             }
 
-            // HOST LOGIC
             const btnCreate = document.getElementById('btn-create-room');
             btnCreate.addEventListener('click', () => {
                 const originalContent = btnCreate.innerHTML;
@@ -415,7 +406,6 @@
                         return;
                     }
 
-                    // Force fresh client ID generation to fix duplicate tab bugs
                     AppState.clientId = 'client_' + Math.random().toString(16).slice(2);
                     AppState.role = 'host';
                     AppState.sessionId = generateSecureCode(bIndex);
@@ -424,7 +414,7 @@
                     AppState.topicChat = `secureqr/chat/${AppState.sessionId}`;
                     saveState(); 
 
-                    AppState.mqttClient.subscribe(AppState.topicSystem, { qos: 1 });
+                    AppState.mqttClient.subscribe(AppState.topicSystem, { qos: 0 });
 
                     document.getElementById('display-session-code').innerText = AppState.sessionId;
                     generateQR(AppState.sessionId);
@@ -434,7 +424,6 @@
                 });
             });
 
-            // GUEST LOGIC
             const btnJoin = document.getElementById('btn-join-room');
             btnJoin.addEventListener('click', () => {
                 const code = document.getElementById('input-join-code').value.trim().toUpperCase();
@@ -443,7 +432,7 @@
                     return;
                 }
 
-                let bIndex = ['E', 'H', 'M'].indexOf(code.charAt(0));
+                let bIndex = ['H', 'E', 'M'].indexOf(code.charAt(0));
                 if (bIndex === -1) {
                     showToast("Invalid code format.", true);
                     return;
@@ -461,7 +450,6 @@
                         return;
                     }
 
-                    // Force fresh client ID generation to fix duplicate tab bugs
                     AppState.clientId = 'client_' + Math.random().toString(16).slice(2);
                     AppState.role = 'guest';
                     AppState.sessionId = code;
@@ -470,12 +458,12 @@
                     AppState.topicChat = `secureqr/chat/${AppState.sessionId}`;
                     saveState(); 
 
-                    AppState.mqttClient.subscribe(AppState.topicSystem, { qos: 1 }, (err) => {
+                    AppState.mqttClient.subscribe(AppState.topicSystem, { qos: 0 }, (err) => {
                         btnJoin.innerText = originalText;
                         btnJoin.disabled = false;
                         if(!err) {
                             const req = { type: 'join_request', senderId: AppState.clientId };
-                            AppState.mqttClient.publish(AppState.topicSystem, JSON.stringify(req), { qos: 1 });
+                            AppState.mqttClient.publish(AppState.topicSystem, JSON.stringify(req), { qos: 0 });
                             showToast("Request sent, waiting for approval...");
                         } else {
                             showToast("Could not reach the room.", true);
@@ -511,7 +499,7 @@
 
             document.getElementById('btn-leave-chat').addEventListener('click', () => {
                 if (AppState.mqttClient) {
-                    AppState.mqttClient.publish(AppState.topicSystem, JSON.stringify({ type: 'leave', senderId: AppState.clientId }), { qos: 1 });
+                    AppState.mqttClient.publish(AppState.topicSystem, JSON.stringify({ type: 'leave', senderId: AppState.clientId }), { qos: 0 });
                 }
                 resetApp();
             });
@@ -523,7 +511,7 @@
                 
                 if (text && AppState.mqttClient) {
                     const msgObj = { type: 'chat', senderId: AppState.clientId, text: text };
-                    AppState.mqttClient.publish(AppState.topicChat, JSON.stringify(msgObj), { qos: 1 });
+                    AppState.mqttClient.publish(AppState.topicChat, JSON.stringify(msgObj), { qos: 0 });
                     
                     renderMessage(text, 'me');
                     input.value = '';
@@ -545,13 +533,13 @@
 
         function respondToJoinRequest(status) {
             const res = { type: 'join_response', senderId: AppState.clientId, targetId: AppState.guestWaitingId, status: status };
-            AppState.mqttClient.publish(AppState.topicSystem, JSON.stringify(res), { qos: 1 });
+            AppState.mqttClient.publish(AppState.topicSystem, JSON.stringify(res), { qos: 0 });
         }
 
         function startChat() {
             AppState.isChatActive = true;
             saveState(); 
-            AppState.mqttClient.subscribe(AppState.topicChat, { qos: 1 });
+            AppState.mqttClient.subscribe(AppState.topicChat, { qos: 0 });
             if(AppState.role === 'guest') {
                 document.getElementById('chat-role-text').innerText = "Guest";
             }
@@ -576,7 +564,6 @@
             switchView('view-home');
         }
 
-        // SECURITY: Bulletproof UI Injection via native textContent
         function renderMessage(text, senderType) {
             const container = document.getElementById('chat-messages');
             const wrapperDiv = document.createElement('div');
@@ -585,8 +572,6 @@
             wrapperDiv.className = `flex w-full ${senderType === 'me' ? 'justify-end' : 'justify-start'}`;
             msgDiv.className = `max-w-[75%] px-4 py-3 rounded-2xl text-sm shadow-sm break-words ${senderType === 'me' ? 'chat-bubble-me' : 'chat-bubble-other'}`;
             
-            // XSS PREVENTION: Using textContent ensures the browser strictly treats the input as text.
-            // Malicious script tags (<script>) or payloads will be safely rendered as raw characters.
             msgDiv.textContent = text;
             
             wrapperDiv.appendChild(msgDiv);
@@ -594,26 +579,22 @@
             container.scrollTop = container.scrollHeight;
         }
 
-        // UPDATED: Show Embedded Area instead of Modal
         function showApprovalModal() {
             document.getElementById('waiting-spinner').classList.add('hidden');
             const area = document.getElementById('area-room-permission');
             area.classList.remove('hidden');
-            // Slight delay to allow CSS transitions to trigger
             setTimeout(() => {
                 area.classList.remove('opacity-0', 'scale-95');
                 area.classList.add('opacity-100', 'scale-100');
             }, 10);
         }
 
-        // UPDATED: Hide Embedded Area and revert to spinner
         function closeApprovalModal() {
             const area = document.getElementById('area-room-permission');
             area.classList.remove('opacity-100', 'scale-100');
             area.classList.add('opacity-0', 'scale-95');
             setTimeout(() => {
                 area.classList.add('hidden');
-                // Only show spinner if we haven't switched to the chat view
                 if (!AppState.isChatActive) {
                     document.getElementById('waiting-spinner').classList.remove('hidden');
                 }
