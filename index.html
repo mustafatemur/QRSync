@@ -193,7 +193,7 @@
             </div>
         </main>
 
-        <footer class="bg-[#f0f2f5] dark:bg-[#202c33] p-2 shrink-0">
+        <footer class="bg-[#f0f2f5] dark:bg-[#202c33] p-2 shrink-0 z-50">
             <div class="max-w-4xl mx-auto flex items-end space-x-2 rtl:space-x-reverse">
                 <input type="file" id="file-input" accept="image/jpeg, image/png, image/webp" class="hidden">
                 <button type="button" id="btn-attach" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 p-2.5 transition shrink-0">
@@ -245,13 +245,13 @@
            0. TRANSLATION SYSTEM (i18n)
            ========================================= */
         const i18n = {
-            en: { appDesc: "Fast & Secure P2P Communication.", createNode: "Create Secure Node", orJoin: "OR JOIN VIA CODE", connectBtn: "Connect Device", nodeActive: "Node Active", nodeDesc: "Scan QR or share the link with the guest device.", sessionCode: "Session Code", copyLink: "Copy Link", waitingConn: "Waiting for incoming connection...", wantsToConnect: "wants to connect.", identityReq: "Identity verification required.", deny: "Deny", accept: "Accept", endSession: "End Session", exit: "Exit", e2eMsg: "🔒 Messages are end-to-end encrypted. No one outside of this chat can read or listen to them.", isTyping: "is typing", typeMsg: "Type a message...", scanToJoin: "Scan QR to Join", enterName: "Your Name", unknownUser: "Unknown User", copied: "Link Copied!", invalidCode: "Enter 7-character code.", connecting: "Connecting...", waitingHost: "Identity sent, waiting for host...", unreachable: "Cannot reach node.", disconnected: "disconnected.", rejected: "Connection Rejected." },
-            tr: { appDesc: "Hızlı & Güvenli P2P İletişim.", createNode: "Güvenli Oda Kur", orJoin: "VEYA KOD İLE KATIL", connectBtn: "Cihaza Bağlan", nodeActive: "Oda Aktif", nodeDesc: "QR kodu okutun veya misafir cihazla linki paylaşın.", sessionCode: "Bağlantı Kodu", copyLink: "Linki Kopyala", waitingConn: "Gelen bağlantı bekleniyor...", wantsToConnect: "bağlanmak istiyor.", identityReq: "Kimlik doğrulaması gerekiyor.", deny: "Reddet", accept: "Kabul Et", endSession: "Oturumu Sonlandır", exit: "Çıkış", e2eMsg: "🔒 Mesajlar uçtan uca şifrelidir. Bu sohbetin dışındaki hiç kimse onları okuyamaz veya dinleyemez.", isTyping: "yazıyor", typeMsg: "Bir mesaj yazın...", scanToJoin: "Katılmak İçin Okut", enterName: "İsminiz", unknownUser: "Bilinmeyen Kullanıcı", copied: "Link Kopyalandı!", invalidCode: "7 haneli kodu girin.", connecting: "Bağlanılıyor...", waitingHost: "İstek gönderildi, onay bekleniyor...", unreachable: "Sunucuya ulaşılamadı.", disconnected: "ayrıldı.", rejected: "Bağlantı Reddedildi." },
-            es: { appDesc: "Comunicación P2P rápida y segura.", createNode: "Crear Nodo Seguro", orJoin: "O ÚNETE VÍA CÓDIGO", connectBtn: "Conectar Dispositivo", nodeActive: "Nodo Activo", nodeDesc: "Escanea el QR o comparte el enlace con el dispositivo invitado.", sessionCode: "Código de Sesión", copyLink: "Copiar Enlace", waitingConn: "Esperando conexión entrante...", wantsToConnect: "quiere conectarse.", identityReq: "Se requiere verificación de identidad.", deny: "Rechazar", accept: "Aceptar", endSession: "Finalizar Sesión", exit: "Salir", e2eMsg: "🔒 Los mensajes están cifrados de extremo a extremo. Nadie fuera de este chat puede leerlos o escucharlos.", isTyping: "está escribiendo", typeMsg: "Escribe un mensaje...", scanToJoin: "Escanear para unirse", enterName: "Tu Nombre", unknownUser: "Usuario Desconocido", copied: "¡Enlace Copiado!", invalidCode: "Ingrese un código de 7 caracteres.", connecting: "Conectando...", waitingHost: "Identidad enviada, esperando al anfitrión...", unreachable: "No se puede llegar al nodo.", disconnected: "desconectado.", rejected: "Conexión Rechazada." },
-            fr: { appDesc: "Communication P2P rapide et sécurisée.", createNode: "Créer un nœud sécurisé", orJoin: "OU REJOINDRE PAR CODE", connectBtn: "Connecter l'appareil", nodeActive: "Nœud actif", nodeDesc: "Scannez le QR ou partagez le lien avec l'appareil invité.", sessionCode: "Code de session", copyLink: "Copier le lien", waitingConn: "En attente de connexion entrante...", wantsToConnect: "veut se connecter.", identityReq: "Vérification d'identité requise.", deny: "Refuser", accept: "Accepter", endSession: "Terminer la session", exit: "Quitter", e2eMsg: "🔒 Les messages sont chiffrés de bout en bout. Personne en dehors de cette discussion ne peut les lire ou les écouter.", isTyping: "écrit", typeMsg: "Tapez un message...", scanToJoin: "Scanner pour rejoindre", enterName: "Votre Nom", unknownUser: "Utilisateur Inconnu", copied: "Lien copié !", invalidCode: "Entrez un code à 7 caractères.", connecting: "Connexion...", waitingHost: "Identité envoyée, en attente de l'hôte...", unreachable: "Impossible d'atteindre le nœud.", disconnected: "déconnecté.", rejected: "Connexion Rejetée." },
-            de: { appDesc: "Schnelle & sichere P2P-Kommunikation.", createNode: "Sicheren Knoten erstellen", orJoin: "ODER PER CODE BEITRETEN", connectBtn: "Gerät verbinden", nodeActive: "Knoten aktiv", nodeDesc: "QR scannen oder Link mit dem Gastgerät teilen.", sessionCode: "Sitzungscode", copyLink: "Link kopieren", waitingConn: "Warten auf eingehende Verbindung...", wantsToConnect: "möchte sich verbinden.", identityReq: "Identitätsprüfung erforderlich.", deny: "Ablehnen", accept: "Akzeptieren", endSession: "Sitzung beenden", exit: "Verlassen", e2eMsg: "🔒 Nachrichten sind Ende-zu-Ende-verschlüsselt. Niemand außerhalb dieses Chats kann sie lesen oder abhören.", isTyping: "schreibt", typeMsg: "Schreibe eine Nachricht...", scanToJoin: "Zum Beitreten scannen", enterName: "Dein Name", unknownUser: "Unbekannter Benutzer", copied: "Link kopiert!", invalidCode: "Geben Sie einen 7-stelligen Code ein.", connecting: "Verbinde...", waitingHost: "Identität gesendet, warte auf Host...", unreachable: "Knoten nicht erreichbar.", disconnected: "getrennt.", rejected: "Verbindung abgelehnt." },
-            ar: { appDesc: "اتصال P2P سريع وآمن.", createNode: "إنشاء عقدة آمنة", orJoin: "أو الانضمام عبر الرمز", connectBtn: "توصيل الجهاز", nodeActive: "العقدة نشطة", nodeDesc: "امسح رمز الاستجابة السريعة أو شارك الرابط مع الجهاز الضيف.", sessionCode: "رمز الجلسة", copyLink: "نسخ الرابط", waitingConn: "في انتظار الاتصال الوارد...", wantsToConnect: "يريد الاتصال.", identityReq: "مطلوب التحقق من الهوية.", deny: "رفض", accept: "قبول", endSession: "إنهاء الجلسة", exit: "خروج", e2eMsg: "🔒 الرسائل مشفرة من البداية إلى النهاية. لا يمكن لأحد خارج هذه المحادثة قراءتها أو الاستماع إليها.", isTyping: "يكتب", typeMsg: "اكتب رسالة...", scanToJoin: "امسح للانضمام", enterName: "اسمك", unknownUser: "مستخدم غير معروف", copied: "تم نسخ الرابط!", invalidCode: "أدخل الرمز المكون من 7 أحرف.", connecting: "جارٍ الاتصال...", waitingHost: "تم إرسال الهوية، في انتظار المضيف...", unreachable: "لا يمكن الوصول إلى العقدة.", disconnected: "غادر.", rejected: "تم رفض الاتصال." },
-            ru: { appDesc: "Быстрая и безопасная P2P связь.", createNode: "Создать безопасный узел", orJoin: "ИЛИ ПРИСОЕДИНИТЕСЬ ПО КОДУ", connectBtn: "Подключить устройство", nodeActive: "Узел активен", nodeDesc: "Отсканируйте QR или поделитесь ссылкой с гостевым устройством.", sessionCode: "Код сеанса", copyLink: "Копировать ссылку", waitingConn: "Ожидание входящего подключения...", wantsToConnect: "хочет подключиться.", identityReq: "Требуется проверка личности.", deny: "Отклонить", accept: "Принять", endSession: "Завершить сеанс", exit: "Выход", e2eMsg: "🔒 Сообщения защищены сквозным шифрованием. Никто за пределами этого чата не сможет их прочитать.", isTyping: "печатает", typeMsg: "Введите сообщение...", scanToJoin: "Сканировать для входа", enterName: "Ваше имя", unknownUser: "Неизвестный пользователь", copied: "Ссылка скопирована!", invalidCode: "Введите 7-значный код.", connecting: "Подключение...", waitingHost: "Запрос отправлен, ожидание...", unreachable: "Узел недоступен.", disconnected: "отключился.", rejected: "В соединении отказано." }
+            en: { appDesc: "Fast & Secure P2P Communication.", createNode: "Create Secure Node", orJoin: "OR JOIN VIA CODE", connectBtn: "Connect Device", nodeActive: "Node Active", nodeDesc: "Scan QR or share the link with the guest device.", sessionCode: "Session Code", copyLink: "Copy Link", waitingConn: "Waiting for incoming connection...", wantsToConnect: "wants to connect.", identityReq: "Identity verification required.", deny: "Deny", accept: "Accept", endSession: "End Session", exit: "Exit", e2eMsg: "🔒 Messages are end-to-end encrypted. No one outside of this chat can read or listen to them.", isTyping: "is typing", typeMsg: "Type a message...", scanToJoin: "Scan QR to Join", enterName: "Your Name", unknownUser: "Unknown User", copied: "Link Copied!", invalidCode: "Enter 7-character code.", connecting: "Connecting...", waitingHost: "Identity sent, waiting for host...", unreachable: "Cannot reach node.", disconnected: "disconnected.", rejected: "Connection Rejected.", panicMode: "Panic Mode: Session Destroyed!" },
+            tr: { appDesc: "Hızlı & Güvenli P2P İletişim.", createNode: "Güvenli Oda Kur", orJoin: "VEYA KOD İLE KATIL", connectBtn: "Cihaza Bağlan", nodeActive: "Oda Aktif", nodeDesc: "QR kodu okutun veya misafir cihazla linki paylaşın.", sessionCode: "Bağlantı Kodu", copyLink: "Linki Kopyala", waitingConn: "Gelen bağlantı bekleniyor...", wantsToConnect: "bağlanmak istiyor.", identityReq: "Kimlik doğrulaması gerekiyor.", deny: "Reddet", accept: "Kabul Et", endSession: "Oturumu Sonlandır", exit: "Çıkış", e2eMsg: "🔒 Mesajlar uçtan uca şifrelidir. Bu sohbetin dışındaki hiç kimse onları okuyamaz veya dinleyemez.", isTyping: "yazıyor", typeMsg: "Bir mesaj yazın...", scanToJoin: "Katılmak İçin Okut", enterName: "İsminiz", unknownUser: "Bilinmeyen Kullanıcı", copied: "Link Kopyalandı!", invalidCode: "7 haneli kodu girin.", connecting: "Bağlanılıyor...", waitingHost: "İstek gönderildi, onay bekleniyor...", unreachable: "Sunucuya ulaşılamadı.", disconnected: "ayrıldı.", rejected: "Bağlantı Reddedildi.", panicMode: "Panik Modu: Oturum İmha Edildi!" },
+            es: { appDesc: "Comunicación P2P rápida y segura.", createNode: "Crear Nodo Seguro", orJoin: "O ÚNETE VÍA CÓDIGO", connectBtn: "Conectar Dispositivo", nodeActive: "Nodo Activo", nodeDesc: "Escanea el QR o comparte el enlace con el dispositivo invitado.", sessionCode: "Código de Sesión", copyLink: "Copiar Enlace", waitingConn: "Esperando conexión entrante...", wantsToConnect: "quiere conectarse.", identityReq: "Se requiere verificación de identidad.", deny: "Rechazar", accept: "Aceptar", endSession: "Finalizar Sesión", exit: "Salir", e2eMsg: "🔒 Los mensajes están cifrados de extremo a extremo. Nadie fuera de este chat puede leerlos o escucharlos.", isTyping: "está escribiendo", typeMsg: "Escribe un mensaje...", scanToJoin: "Escanear para unirse", enterName: "Tu Nombre", unknownUser: "Usuario Desconocido", copied: "¡Enlace Copiado!", invalidCode: "Ingrese un código de 7 caracteres.", connecting: "Conectando...", waitingHost: "Identidad enviada, esperando al anfitrión...", unreachable: "No se puede llegar al nodo.", disconnected: "desconectado.", rejected: "Conexión Rechazada.", panicMode: "Modo Pánico: ¡Sesión Destruida!" },
+            fr: { appDesc: "Communication P2P rapide et sécurisée.", createNode: "Créer un nœud sécurisé", orJoin: "OU REJOINDRE PAR CODE", connectBtn: "Connecter l'appareil", nodeActive: "Nœud actif", nodeDesc: "Scannez le QR ou partagez le lien avec l'appareil invité.", sessionCode: "Code de session", copyLink: "Copier le lien", waitingConn: "En attente de connexion entrante...", wantsToConnect: "veut se connecter.", identityReq: "Vérification d'identité requise.", deny: "Refuser", accept: "Accepter", endSession: "Terminer la session", exit: "Quitter", e2eMsg: "🔒 Les messages sont chiffrés de bout en bout. Personne en dehors de cette discussion ne peut les lire ou les écouter.", isTyping: "écrit", typeMsg: "Tapez un message...", scanToJoin: "Scanner pour rejoindre", enterName: "Votre Nom", unknownUser: "Utilisateur Inconnu", copied: "Lien copié !", invalidCode: "Entrez un code à 7 caractères.", connecting: "Connexion...", waitingHost: "Identité envoyée, en attente de l'hôte...", unreachable: "Impossible d'atteindre le nœud.", disconnected: "déconnecté.", rejected: "Connexion Rejetée.", panicMode: "Mode Panique : Session Détruite!" },
+            de: { appDesc: "Schnelle & sichere P2P-Kommunikation.", createNode: "Sicheren Knoten erstellen", orJoin: "ODER PER CODE BEITRETEN", connectBtn: "Gerät verbinden", nodeActive: "Knoten aktiv", nodeDesc: "QR scannen oder Link mit dem Gastgerät teilen.", sessionCode: "Sitzungscode", copyLink: "Link kopieren", waitingConn: "Warten auf eingehende Verbindung...", wantsToConnect: "möchte sich verbinden.", identityReq: "Identitätsprüfung erforderlich.", deny: "Ablehnen", accept: "Akzeptieren", endSession: "Sitzung beenden", exit: "Verlassen", e2eMsg: "🔒 Nachrichten sind Ende-zu-Ende-verschlüsselt. Niemand außerhalb dieses Chats kann sie lesen oder abhören.", isTyping: "schreibt", typeMsg: "Schreibe eine Nachricht...", scanToJoin: "Zum Beitreten scannen", enterName: "Dein Name", unknownUser: "Unbekannter Benutzer", copied: "Link kopiert!", invalidCode: "Geben Sie einen 7-stelligen Code ein.", connecting: "Verbinde...", waitingHost: "Identität gesendet, warte auf Host...", unreachable: "Knoten nicht erreichbar.", disconnected: "getrennt.", rejected: "Verbindung abgelehnt.", panicMode: "Panikmodus: Sitzung zerstört!" },
+            ar: { appDesc: "اتصال P2P سريع وآمن.", createNode: "إنشاء عقدة آمنة", orJoin: "أو الانضمام عبر الرمز", connectBtn: "توصيل الجهاز", nodeActive: "العقدة نشطة", nodeDesc: "امسح رمز الاستجابة السريعة أو شارك الرابط مع الجهاز الضيف.", sessionCode: "رمز الجلسة", copyLink: "نسخ الرابط", waitingConn: "في انتظار الاتصال الوارد...", wantsToConnect: "يريد الاتصال.", identityReq: "مطلوب التحقق من الهوية.", deny: "رفض", accept: "قبول", endSession: "إنهاء الجلسة", exit: "خروج", e2eMsg: "🔒 الرسائل مشفرة من البداية إلى النهاية. لا يمكن لأحد خارج هذه المحادثة قراءتها أو الاستماع إليها.", isTyping: "يكتب", typeMsg: "اكتب رسالة...", scanToJoin: "امسح للانضمام", enterName: "اسمك", unknownUser: "مستخدم غير معروف", copied: "تم نسخ الرابط!", invalidCode: "أدخل الرمز المكون من 7 أحرف.", connecting: "جارٍ الاتصال...", waitingHost: "تم إرسال الهوية، في انتظار المضيف...", unreachable: "لا يمكن الوصول إلى العقدة.", disconnected: "غادر.", rejected: "تم رفض الاتصال.", panicMode: "وضع الذعر: تم تدمير الجلسة!" },
+            ru: { appDesc: "Быстрая и безопасная P2P связь.", createNode: "Создать безопасный узел", orJoin: "ИЛИ ПРИСОЕДИНИТЕСЬ ПО КОДУ", connectBtn: "Подключить устройство", nodeActive: "Узел активен", nodeDesc: "Отсканируйте QR или поделитесь ссылкой с гостевым устройством.", sessionCode: "Код сеанса", copyLink: "Копировать ссылку", waitingConn: "Ожидание входящего подключения...", wantsToConnect: "хочет подключиться.", identityReq: "Требуется проверка личности.", deny: "Отклонить", accept: "Принять", endSession: "Завершить сеанс", exit: "Выход", e2eMsg: "🔒 Сообщения защищены сквозным шифрованием. Никто за пределами этого чата не сможет их прочитать.", isTyping: "печатает", typeMsg: "Введите сообщение...", scanToJoin: "Сканировать для входа", enterName: "Ваше имя", unknownUser: "Неизвестный пользователь", copied: "Ссылка скопирована!", invalidCode: "Введите 7-значный код.", connecting: "Подключение...", waitingHost: "Запрос отправлен, ожидание...", unreachable: "Узел недоступен.", disconnected: "отключился.", rejected: "В соединении отказано.", panicMode: "Режим паники: сеанс уничтожен!" }
         };
         let currentLang = localStorage.getItem('nexus_lang') || 'en';
 
@@ -562,6 +562,8 @@
         function loadChatHistory() {
             const container = document.getElementById('chat-messages');
             const tInd = document.getElementById('typing-indicator').outerHTML;
+            
+            // Explicitly clear DOM to prevent any ghost data
             container.innerHTML = `
             <div class="text-center w-full my-2">
                 <span class="bg-[#ffeecd] dark:bg-[#182229] text-gray-700 dark:text-[#ffd279] text-xs px-3 py-1.5 rounded-lg shadow-sm inline-block max-w-xs leading-relaxed text-center" data-i18n="e2eMsg">
@@ -640,10 +642,10 @@
                 
                 if (AppState.role === 'host') {
                     document.getElementById('display-session-code').innerText = AppState.sessionId; generateQR(AppState.sessionId);
-                    if (AppState.isChatActive) { updateChatHeader(); switchView('view-chat'); loadChatHistory(); } else { switchView('view-waiting'); }
+                    if (AppState.isChatActive) { updateChatHeader(); loadChatHistory(); switchView('view-chat'); } else { switchView('view-waiting'); }
                 } else {
                     document.getElementById('input-join-code').value = AppState.sessionId;
-                    if (AppState.isChatActive) { updateChatHeader(); switchView('view-chat'); loadChatHistory(); } else { switchView('view-home'); }
+                    if (AppState.isChatActive) { updateChatHeader(); loadChatHistory(); switchView('view-chat'); } else { switchView('view-home'); }
                 }
 
                 connectMQTT((success) => {
@@ -736,20 +738,69 @@
                 if (navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(url).then(() => showToast(i18n[currentLang].copied));
                 } else { const ta = document.createElement("textarea"); ta.value = url; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); showToast(i18n[currentLang].copied); }
             });
+
+            /* =========================================
+               7. PANIC MODE (SELF-DESTRUCT)
+               ========================================= */
+            let panicTapCount = 0;
+            let panicTimer;
+            document.addEventListener('click', (e) => {
+                // Sadece bir oda oturumu (bekleme veya sohbet) aktifse panik modu çalışsın
+                if (!AppState.sessionId) return;
+                
+                panicTapCount++;
+                clearTimeout(panicTimer);
+                
+                if (panicTapCount >= 3) {
+                    // Panik Modu Tetiklendi!
+                    if (AppState.mqtt) AppState.mqtt.publish(`qsys/${AppState.sessionId}`, JSON.stringify({ type: 'leave', senderId: AppState.clientId }), { qos: 0 });
+                    resetApp();
+                    showToast(i18n[currentLang].panicMode, true);
+                    panicTapCount = 0;
+                } else {
+                    // 3 tıklamayı yapmak için 800 milisaniye süre tanır
+                    panicTimer = setTimeout(() => { panicTapCount = 0; }, 800); 
+                }
+            });
         });
 
         function startChat() {
             AppState.isChatActive = true; updateChatHeader(); saveState(); 
             AppState.mqtt.subscribe(`qchat/${AppState.sessionId}`, { qos: 0 });
+            loadChatHistory(); // Ensure DOM is refreshed cleanly upon starting chat
             switchView('view-chat'); setTimeout(scrollChatToBottom, 100);
         }
 
         function resetApp() {
             if (AppState.mqtt) { if(AppState.sessionId) { AppState.mqtt.unsubscribe(`qsys/${AppState.sessionId}`); AppState.mqtt.unsubscribe(`qchat/${AppState.sessionId}`); } }
+            
+            // SECURITY PATCH: HARD PURGE STATE & STORAGE
             AppState.sessionId = null; AppState.role = null; AppState.isChatActive = false; AppState.guestWaitingId = null; AppState.chatHistory = []; cryptoKey = null; AppState.otherName = i18n[currentLang].unknownUser;
-            saveState(); 
-            document.getElementById('input-join-code').value = ''; document.getElementById('btn-join-room').innerText = i18n[currentLang].connectBtn;
-            if(html5QrcodeScanner) closeScanner(); switchView('view-home');
+            sessionStorage.removeItem('nexus_state_v5'); // Destroys the key entirely instead of overwriting.
+
+            // SECURITY PATCH: PURGE URL TO PREVENT SHOULDER-SURFING LEAKS
+            if (window.history.replaceState) {
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+
+            // SECURITY PATCH: DOM OBLITERATION (Destroy invisible ghost messages)
+            const container = document.getElementById('chat-messages');
+            const tInd = document.getElementById('typing-indicator').outerHTML;
+            container.innerHTML = `
+            <div class="text-center w-full my-2">
+                <span class="bg-[#ffeecd] dark:bg-[#182229] text-gray-700 dark:text-[#ffd279] text-xs px-3 py-1.5 rounded-lg shadow-sm inline-block max-w-xs leading-relaxed text-center" data-i18n="e2eMsg">
+                    ${i18n[currentLang].e2eMsg}
+                </span>
+            </div>` + tInd;
+
+            // Clear inputs
+            document.getElementById('input-chat').value = '';
+            document.getElementById('file-input').value = '';
+            document.getElementById('input-join-code').value = ''; 
+            
+            document.getElementById('btn-join-room').innerText = i18n[currentLang].connectBtn;
+            if(html5QrcodeScanner) closeScanner(); 
+            switchView('view-home');
         }
 
         function showApprovalModal() { document.getElementById('waiting-spinner').classList.add('hidden'); document.getElementById('area-room-permission').classList.remove('hidden'); }
