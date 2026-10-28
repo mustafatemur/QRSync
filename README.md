@@ -25,6 +25,10 @@ Whether you need to securely beam physical barcode data from a mobile scanner to
 
 ## ✨ Core Features & Security Architecture
 
+### 🚨 Panic Mode (Self-Destruct Protocol)
+*   **Anti-Shoulder Surfing:** In the event of a physical privacy threat (someone looking at your screen), simply **tap anywhere on the screen 3 times rapidly**. 
+*   **Immediate Obliteration:** The session is instantly terminated, the WebSocket is severed, and all chat history is irreversibly purged from both the DOM and RAM (`sessionStorage`), returning you instantly to the home screen.
+
 ### 🛡️ Asymmetric & Symmetric Cryptography (E2EE)
 *   **AES-256-GCM:** All text messages and images are encrypted locally on the device using the native `Web Crypto API` before transmission.
 *   **PBKDF2 Key Derivation:** The 7-character session code is transformed into a highly secure encryption key via 100,000 iterations of PBKDF2. The public MQTT broker only routes unbreakable ciphertext.
@@ -32,7 +36,7 @@ Whether you need to securely beam physical barcode data from a mobile scanner to
 ### 🌍 Global Ready (Multi-Language & RTL)
 *   Built-in **i18n** translation system with instant, zero-reload switching.
 *   Supports **7 Languages:** English, Turkish, Spanish, French, German, Russian, and Arabic.
-*   **Full RTL Support:** When Arabic is selected, the entire UI (including flex alignments, chat bubbles, and icons) perfectly mirrors to Right-to-Left orientation.
+*   **Full RTL Support:** When Arabic is selected, the entire UI perfectly mirrors to Right-to-Left orientation.
 
 ### 📸 Hardware Integrations
 *   **Built-in Scanner:** Native HTML5 camera integration. Scan a host's QR code from the home screen to instantly and securely join a node without typing.
@@ -49,14 +53,7 @@ Whether you need to securely beam physical barcode data from a mobile scanner to
 ### 🛡️ Zero-Trust UI & XSS Immunity
 *   **Strict CSP:** Enforced Content-Security-Policy headers.
 *   **DOM Injection Defense:** Usernames and incoming messages are rendered strictly as text nodes (`textContent`), making Cross-Site Scripting (XSS) impossible.
-*   **Session Recovery:** Accidentally refreshed? Your encrypted state, session ID, and chat history are securely held in `sessionStorage` and instantly restored.
-
-## 📱 User Experience (WhatsApp-Style UI)
-*   **Custom Identities:** Choose your own display name upon entry.
-*   **Compact UI:** Side-by-side username and timestamp rendering inside sleek chat bubbles.
-*   **Dark/Light Mode:** Seamless theme toggling.
-*   **Secure Image Modal:** Click on received images to view them in a blurred-background fullscreen modal.
-*   **Typing Indicators:** Real-time visual feedback when the remote device is typing.
+*   **Hard Purge on Exit:** Leaving a room doesn't just hide data; it completely obliterates the state and session traces from the browser and URL.
 
 ## 🚦 How to Use
 
@@ -71,6 +68,13 @@ Whether you need to securely beam physical barcode data from a mobile scanner to
 2. Enter your name.
 3. Tap the **Scanner Icon** and scan the host's QR code, OR enter the 7-character code manually.
 4. Wait for the host to approve your identity.
+5. **Panic Mode:** Triple-tap the screen at any time to instantly destroy the session.
+
+## ⚠️ Disclaimer & Acceptable Use
+
+**[🇬🇧]** Nexus is provided "as is" for educational purposes, security research, and legitimate privacy needs. The developer assumes no responsibility or liability for any misuse, illegal activities, or damage caused by the use of this software. By using Nexus, users accept full responsibility for ensuring their communications comply with all applicable local, state, and international laws.
+
+**[🇹🇷]** Nexus; eğitim, güvenlik araştırmaları ve meşru gizlilik ihtiyaçları için "olduğu gibi" sunulmaktadır. Geliştirici, bu yazılımın kötüye kullanımı, yasadışı faaliyetlerde kullanılması veya verebileceği zararlardan hiçbir şekilde sorumlu tutulamaz. Yazılımı kullananlar, eylemlerinin ve iletişimlerinin yerel ve uluslararası yasalara uygun olmasından tamamen kendileri sorumludur.
 
 ## 🛠️ Technical Stack
 *   **Frontend:** HTML5, Vanilla JavaScript (ES6+), `sessionStorage`
@@ -85,6 +89,3 @@ Nexus is a 100% client-side application contained within a single `index.html` f
 2. Go to **Settings > Pages**.
 3. Set the Source to the `main` branch.
 4. Your secure terminal is live!
-
----
-*Disclaimer: While Nexus uses AES-256-GCM encryption, it relies on public MQTT brokers for signaling. Do not use for transmitting highly classified government data.*
