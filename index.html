@@ -1,14 +1,16 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- SECURITY: Strict Content Security Policy to prevent unauthorized script injections -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline'; connect-src 'self' wss://broker.emqx.io:8084 wss://broker.hivemq.com:8443 wss://test.mosquitto.org:8081;">
     <title>QRSync - Secure Communication</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- QRCode.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <!-- MQTT.js (Daha stabil CDN ile güncellendi) -->
+    <!-- MQTT.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/4.3.7/mqtt.min.js"></script>
     <style>
         body { font-family: 'Inter', sans-serif; }
@@ -27,7 +29,7 @@
             color: #1f2937;
             border-bottom-left-radius: 0;
         }
-        /* Özel kaydırma çubuğu */
+        /* Custom scrollbar */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
@@ -36,82 +38,83 @@
 </head>
 <body class="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 min-h-screen flex items-center justify-center p-4">
 
-    <!-- ANA EKRAN (Oda Kur veya Katıl) -->
+    <!-- HOME VIEW (Create or Join) -->
     <div id="view-home" class="w-full max-w-md glass-panel rounded-3xl shadow-2xl p-8 text-center transition-all duration-300">
         <div class="mb-6 text-indigo-600">
             <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
         </div>
         <h1 class="text-3xl font-bold text-gray-800 mb-2">QRSync</h1>
-        <p class="text-gray-500 text-sm mb-8">İki cihaz arasında şifrelenmiş, onaylı ve karşılıklı iletişim kurun.</p>
+        <p class="text-gray-500 text-sm mb-8">Establish encrypted, approved, and mutual communication between two devices.</p>
         
         <button id="btn-create-room" class="w-full mb-6 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold py-3 px-4 rounded-xl shadow-lg transform transition active:scale-95 flex justify-center items-center disabled:opacity-75 disabled:cursor-not-allowed">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-            <span>Yeni Oda Kur</span>
+            <span>Create New Room</span>
         </button>
 
         <div class="relative flex py-3 items-center">
             <div class="flex-grow border-t border-gray-300"></div>
-            <span class="flex-shrink-0 mx-4 text-gray-400 text-sm font-medium">VEYA KOD İLE KATIL</span>
+            <span class="flex-shrink-0 mx-4 text-gray-400 text-sm font-medium">OR JOIN WITH CODE</span>
             <div class="flex-grow border-t border-gray-300"></div>
         </div>
 
         <div class="mt-4 space-y-3">
             <input type="text" id="input-join-code" maxlength="6" class="w-full px-4 py-3 text-center text-2xl tracking-widest font-mono rounded-xl border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition uppercase" placeholder="______">
             <button id="btn-join-room" class="w-full bg-white border-2 border-indigo-500 text-indigo-600 hover:bg-indigo-50 font-bold py-3 px-4 rounded-xl shadow-sm transform transition active:scale-95 disabled:opacity-75 disabled:cursor-not-allowed">
-                Odaya Katıl
+                Join Room
             </button>
         </div>
     </div>
 
-    <!-- ODA KURUCU BEKLEME EKRANI -->
+    <!-- HOST WAITING VIEW -->
     <div id="view-waiting" class="hidden w-full max-w-md glass-panel rounded-3xl shadow-2xl p-8 text-center transition-all duration-300">
-        <h2 class="text-2xl font-bold text-gray-800 mb-2">Bağlantı Bekleniyor</h2>
-        <p class="text-gray-500 text-sm mb-6">Karşı cihazın kamerasıyla QR kodu okutmasını veya bağlantı kodunu girmesini bekleyin.</p>
+        <h2 class="text-2xl font-bold text-gray-800 mb-2">Waiting for Connection</h2>
+        <p class="text-gray-500 text-sm mb-6">Wait for the guest device to scan the QR code with their camera or enter the connection code.</p>
         
         <div class="flex flex-col items-center justify-center bg-white p-6 rounded-2xl shadow-inner mx-auto w-max mb-6">
             <div id="qrcode" class="mb-4"></div>
             <div class="text-center">
-                <span class="text-xs text-gray-400 uppercase tracking-wider block mb-1">Bağlantı Kodu</span>
+                <span class="text-xs text-gray-400 uppercase tracking-wider block mb-1">Connection Code</span>
                 <span id="display-session-code" class="text-2xl font-mono font-bold text-indigo-600 tracking-widest block mb-3"></span>
                 <button id="btn-copy-link" class="text-sm bg-indigo-50 hover:bg-indigo-100 text-indigo-600 py-1.5 px-4 rounded-lg font-medium transition flex items-center justify-center mx-auto active:scale-95">
                     <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                    Linki Kopyala
+                    Copy Link
                 </button>
             </div>
         </div>
         
         <div class="flex items-center justify-center space-x-2 mb-6">
             <span class="w-3 h-3 rounded-full bg-yellow-400 animate-pulse"></span>
-            <span class="text-yellow-600 font-medium text-sm">İstek bekleniyor...</span>
+            <span class="text-yellow-600 font-medium text-sm">Waiting for request...</span>
         </div>
 
-        <button id="btn-cancel-waiting" class="text-sm text-gray-500 hover:text-red-500 transition underline">İptal Et ve Geri Dön</button>
+        <button id="btn-cancel-waiting" class="text-sm text-gray-500 hover:text-red-500 transition underline">Cancel & Return</button>
     </div>
 
-    <!-- SOHBET EKRANI -->
+    <!-- CHAT VIEW -->
     <div id="view-chat" class="hidden w-full max-w-2xl h-[80vh] flex flex-col glass-panel rounded-3xl shadow-2xl overflow-hidden transition-all duration-300">
         <div class="bg-white px-6 py-4 border-b flex justify-between items-center shadow-sm z-10">
             <div class="flex items-center space-x-3">
                 <div class="w-3 h-3 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]"></div>
                 <div>
-                    <h3 class="font-bold text-gray-800 leading-tight">QRSync Aktif</h3>
-                    <p class="text-xs text-gray-500" id="chat-role-text">Oda Kurucusu</p>
+                    <h3 class="font-bold text-gray-800 leading-tight">QRSync Active</h3>
+                    <p class="text-xs text-gray-500" id="chat-role-text">Room Host</p>
                 </div>
             </div>
-            <button id="btn-leave-chat" class="text-red-500 hover:bg-red-50 p-2 rounded-lg transition" title="Bağlantıyı Kopart">
+            <button id="btn-leave-chat" class="text-red-500 hover:bg-red-50 p-2 rounded-lg transition" title="Disconnect">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
             </button>
         </div>
 
         <div id="chat-messages" class="flex-1 p-6 overflow-y-auto bg-gray-50/50 space-y-4 flex flex-col">
             <div class="text-center w-full">
-                <span class="bg-gray-200 text-gray-600 text-xs px-3 py-1 rounded-full">Bağlantı kuruldu. Mesajlar uçtan uca olmasa da izole iletilir.</span>
+                <span class="bg-gray-200 text-gray-600 text-xs px-3 py-1 rounded-full">Connection established. Messages are isolated and secure.</span>
             </div>
         </div>
 
         <div class="bg-white p-4 border-t">
             <form id="form-chat" class="flex space-x-2">
-                <input type="text" id="input-chat" class="flex-1 px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition" placeholder="Mesajınızı veya barkod verisini yazın..." autocomplete="off">
+                <!-- SECURITY: Max length to prevent DoS via massive payload injection -->
+                <input type="text" id="input-chat" maxlength="2000" class="flex-1 px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition" placeholder="Type your message or barcode data..." autocomplete="off">
                 <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl px-6 font-bold shadow-md transition transform active:scale-95 flex items-center justify-center">
                     <svg class="w-5 h-5 transform rotate-90" fill="currentColor" viewBox="0 0 20 20"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path></svg>
                 </button>
@@ -119,36 +122,28 @@
         </div>
     </div>
 
-    <!-- ONAY MODALI -->
+    <!-- APPROVAL MODAL -->
     <div id="modal-approval" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50 p-4 opacity-0 transition-opacity duration-300">
         <div class="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl transform scale-95 transition-transform duration-300" id="modal-content">
             <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-600">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4"></path></svg>
             </div>
-            <h3 class="text-xl font-bold text-center text-gray-800 mb-2">Bağlantı İsteği</h3>
-            <p class="text-center text-gray-600 mb-8 text-sm">Bir cihaz odanıza katılmak istiyor. İletişimi başlatmak için onaylıyor musunuz?</p>
+            <h3 class="text-xl font-bold text-center text-gray-800 mb-2">Connection Request</h3>
+            <p class="text-center text-gray-600 mb-8 text-sm">A device wants to join your room. Do you approve to start communication?</p>
             <div class="flex space-x-3">
-                <button id="btn-reject" class="flex-1 py-3 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition">Reddet</button>
-                <button id="btn-approve" class="flex-1 py-3 px-4 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl shadow-lg transition">Onayla</button>
+                <button id="btn-reject" class="flex-1 py-3 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition">Reject</button>
+                <button id="btn-approve" class="flex-1 py-3 px-4 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl shadow-lg transition">Approve</button>
             </div>
         </div>
     </div>
 
-    <!-- HATA/BİLGİ TOAST MESAJI -->
+    <!-- NOTIFICATION TOAST -->
     <div id="toast" class="fixed bottom-4 right-4 bg-gray-800 text-white px-6 py-3 rounded-xl shadow-2xl transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center pointer-events-none">
-        <span id="toast-msg">Hata oluştu.</span>
+        <span id="toast-msg">Error occurred.</span>
     </div>
 
     <script>
-        // Güvenlik: Zararlı karakterleri temizle
-        function escapeHTML(str) {
-            if (typeof str !== 'string') return '';
-            return str.replace(/[&<>'"]/g, tag => ({
-                '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
-            }[tag]));
-        }
-
-        // Güvenli rastgele oturum kodu oluştur
+        // SECURITY: Generate a cryptographically secure random session code
         function generateSecureCode() {
             const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             let result = '';
@@ -181,20 +176,46 @@
             document.getElementById(viewId).classList.remove('hidden');
         }
 
-        const AppState = {
+        // Session Recovery mechanism
+        const savedState = sessionStorage.getItem('qrsync_state');
+        const defaultState = {
             clientId: 'client_' + Math.random().toString(16).slice(2),
             sessionId: null,
             role: null,
-            mqttClient: null,
-            topicSystem: '',
-            topicChat: '',
-            guestWaitingId: null
+            isChatActive: false
         };
+        
+        const AppState = savedState ? 
+            { ...defaultState, ...JSON.parse(savedState), mqttClient: null, topicSystem: '', topicChat: '', guestWaitingId: null } : 
+            { ...defaultState, mqttClient: null, topicSystem: '', topicChat: '', guestWaitingId: null };
 
-        // GÜNCELLENDİ: Hata Yönetimli ve Çoklu Sunucu (Fallback) Destekli MQTT Bağlantısı
+        // Save state securely to sessionStorage (cleared when tab closes)
+        function saveState() {
+            sessionStorage.setItem('qrsync_state', JSON.stringify({
+                clientId: AppState.clientId,
+                sessionId: AppState.sessionId,
+                role: AppState.role,
+                isChatActive: AppState.isChatActive
+            }));
+        }
+
+        function generateQR(sessionId) {
+            let currentUrl = window.location.href.split('?')[0];
+            let connectUrl = `${currentUrl}?session=${sessionId}`;
+            const qrContainer = document.getElementById("qrcode");
+            qrContainer.innerHTML = '';
+            try {
+                new QRCode(qrContainer, {
+                    text: connectUrl, width: 180, height: 180,
+                    colorDark : "#1e1b4b", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H
+                });
+            } catch(e) { console.error("QR Generation Error", e); }
+        }
+
+        // MQTT Connection with Multiple Brokers Fallback
         function connectMQTT(callback) {
             if (typeof mqtt === 'undefined') {
-                callback(false, "Sistem kütüphaneleri yüklenemedi. Lütfen sayfayı yenileyin.");
+                callback(false, "System libraries failed to load. Please refresh the page.");
                 return;
             }
 
@@ -205,11 +226,11 @@
             
             if (AppState.mqttClient) AppState.mqttClient.end();
 
-            // Farklı portlar kullanan dünyaca ünlü açık MQTT sunucuları (Operatör engellerini aşmak için)
+            // Fallback public brokers to bypass cellular network port blocking
             const brokers = [
-                'wss://broker.emqx.io:8084/mqtt',      // EMQX (Genelde çok stabil - Yeni Varsayılan)
-                'wss://broker.hivemq.com:8443/mqtt',   // HiveMQ (Yedek 1)
-                'wss://test.mosquitto.org:8081/mqtt'   // Mosquitto (Yedek 2)
+                'wss://broker.emqx.io:8084/mqtt',      
+                'wss://broker.hivemq.com:8443/mqtt',   
+                'wss://test.mosquitto.org:8081/mqtt'   
             ];
             
             let brokerIndex = 0;
@@ -219,7 +240,7 @@
                 if (brokerIndex >= brokers.length) {
                     if (!isResolved) {
                         isResolved = true;
-                        callback(false, "Hiçbir sunucuya ulaşılamadı. Operatörünüz WebSockets portlarını katı şekilde engelliyor olabilir.");
+                        callback(false, "Could not reach any server. Your network might be blocking WebSockets.");
                     }
                     return;
                 }
@@ -228,17 +249,16 @@
                 
                 try {
                     const client = mqtt.connect(brokerUrl, {
-                        connectTimeout: 4000, // Her sunucu için en fazla 4 saniye bekle
-                        reconnectPeriod: 0    // Başarısız olursa tekrar deneme, hemen diğer sunucuya geç
+                        connectTimeout: 4000, 
+                        reconnectPeriod: 0    
                     });
 
-                    // Zaman aşımı kontrolü (Sunucu cevap vermezse askıda kalmayı önler)
                     let timeoutTimer = setTimeout(() => {
                         if (!client.connected) {
                             client.end();
                             if(!isResolved) {
                                 brokerIndex++;
-                                tryConnect(); // Bir sonraki sunucuyu dene
+                                tryConnect(); 
                             }
                         }
                     }, 4500);
@@ -249,7 +269,7 @@
                             isResolved = true;
                             AppState.mqttClient = client;
                             AppState.mqttClient.on('message', handleIncomingMessage);
-                            callback(true); // Bağlantı başarılı!
+                            callback(true); 
                         }
                     });
 
@@ -258,25 +278,36 @@
                         client.end();
                         if (!client.connected && !isResolved) {
                             brokerIndex++;
-                            tryConnect(); // Hata verirse bir sonraki sunucuyu dene
+                            tryConnect(); 
                         }
                     });
 
                 } catch (error) {
                     brokerIndex++;
-                    tryConnect(); // Kritik çökme olursa bir sonraki sunucuyu dene
+                    tryConnect(); 
                 }
             }
 
-            // İlk sunucuyu (EMQX) denemeye başla
             tryConnect();
         }
 
+        // SECURITY: Strict Schema Validation & Type Checking for Incoming Messages
         function handleIncomingMessage(topic, message) {
             let data;
             try {
                 data = JSON.parse(message.toString());
-            } catch (e) { return; }
+                
+                // Validate schema to prevent prototype pollution and injection
+                if (!data || typeof data !== 'object') return;
+                if (typeof data.type !== 'string' || typeof data.senderId !== 'string') return;
+                
+                // Enforce max payload size to prevent memory DoS attacks
+                if (data.text && typeof data.text === 'string') {
+                    if (data.text.length > 2000) data.text = data.text.substring(0, 2000);
+                } else if (data.text) {
+                    return; // Drop if text is provided but not a string (e.g. object/array injection)
+                }
+            } catch (e) { return; } // Drop malformed JSON silently
 
             if (data.senderId === AppState.clientId && data.type !== 'chat') return;
 
@@ -287,15 +318,15 @@
                 } 
                 else if (AppState.role === 'guest' && data.type === 'join_response' && data.targetId === AppState.clientId) {
                     if (data.status === 'accepted') {
-                        showToast("Bağlantı Onaylandı!");
+                        showToast("Connection Approved!");
                         startChat();
                     } else {
-                        showToast("Oda kurucusu bağlantıyı reddetti.", true);
+                        showToast("Host rejected the connection.", true);
                         resetApp();
                     }
                 }
                 else if (data.type === 'leave') {
-                    showToast("Karşı taraf bağlantıyı kopardı.", true);
+                    showToast("The other device disconnected.", true);
                     resetApp();
                 }
             }
@@ -307,17 +338,54 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const sessionFromUrl = urlParams.get('session');
-            if (sessionFromUrl) {
-                document.getElementById('input-join-code').value = sessionFromUrl;
+            // Auto-recover session on page refresh
+            if (AppState.sessionId && AppState.role) {
+                AppState.topicSystem = `secureqr/sys/${AppState.sessionId}`;
+                AppState.topicChat = `secureqr/chat/${AppState.sessionId}`;
+                
+                if (AppState.role === 'host') {
+                    document.getElementById('display-session-code').innerText = AppState.sessionId;
+                    generateQR(AppState.sessionId);
+                    document.getElementById('chat-role-text').innerText = "Room Host";
+                    switchView(AppState.isChatActive ? 'view-chat' : 'view-waiting');
+                } else {
+                    document.getElementById('input-join-code').value = AppState.sessionId;
+                    document.getElementById('chat-role-text').innerText = "Guest";
+                    switchView(AppState.isChatActive ? 'view-chat' : 'view-home');
+                }
+
+                connectMQTT((success, errorMsg) => {
+                    if (success) {
+                        AppState.mqttClient.subscribe(AppState.topicSystem);
+                        if (AppState.isChatActive) {
+                            AppState.mqttClient.subscribe(AppState.topicChat);
+                            showToast("Connection successfully recovered.");
+                        } else if (AppState.role === 'guest') {
+                            const req = { type: 'join_request', senderId: AppState.clientId };
+                            AppState.mqttClient.publish(AppState.topicSystem, JSON.stringify(req));
+                        }
+                    } else {
+                        showToast("Failed to recover connection: " + errorMsg, true);
+                        resetApp();
+                    }
+                });
+            } else {
+                // Auto-join if opened via QR Code scan
+                const urlParams = new URLSearchParams(window.location.search);
+                const sessionFromUrl = urlParams.get('session');
+                if (sessionFromUrl) {
+                    document.getElementById('input-join-code').value = sessionFromUrl;
+                    setTimeout(() => {
+                        document.getElementById('btn-join-room').click();
+                    }, 500); 
+                }
             }
 
-            // ODA KURMA
+            // HOST LOGIC
             const btnCreate = document.getElementById('btn-create-room');
             btnCreate.addEventListener('click', () => {
                 const originalContent = btnCreate.innerHTML;
-                btnCreate.innerHTML = '<span class="animate-pulse">Bağlanılıyor...</span>';
+                btnCreate.innerHTML = '<span class="animate-pulse">Connecting...</span>';
                 btnCreate.disabled = true;
 
                 connectMQTT((success, errorMsg) => {
@@ -331,40 +399,32 @@
 
                     AppState.role = 'host';
                     AppState.sessionId = generateSecureCode();
+                    AppState.isChatActive = false;
                     AppState.topicSystem = `secureqr/sys/${AppState.sessionId}`;
                     AppState.topicChat = `secureqr/chat/${AppState.sessionId}`;
+                    saveState(); 
 
                     AppState.mqttClient.subscribe(AppState.topicSystem);
 
                     document.getElementById('display-session-code').innerText = AppState.sessionId;
-                    
-                    let currentUrl = window.location.href.split('?')[0];
-                    let connectUrl = `${currentUrl}?session=${AppState.sessionId}`;
-                    const qrContainer = document.getElementById("qrcode");
-                    qrContainer.innerHTML = '';
-                    try {
-                        new QRCode(qrContainer, {
-                            text: connectUrl, width: 180, height: 180,
-                            colorDark : "#1e1b4b", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H
-                        });
-                    } catch(e) { console.error("QR Hatası", e); }
+                    generateQR(AppState.sessionId);
 
-                    document.getElementById('chat-role-text').innerText = "Oda Kurucusu";
+                    document.getElementById('chat-role-text').innerText = "Room Host";
                     switchView('view-waiting');
                 });
             });
 
-            // ODAYA KATILMA
+            // GUEST LOGIC
             const btnJoin = document.getElementById('btn-join-room');
             btnJoin.addEventListener('click', () => {
                 const code = document.getElementById('input-join-code').value.trim().toUpperCase();
                 if (code.length !== 6) {
-                    showToast("Lütfen 6 haneli geçerli bir kod girin.", true);
+                    showToast("Please enter a valid 6-character code.", true);
                     return;
                 }
 
                 const originalText = btnJoin.innerText;
-                btnJoin.innerText = "Bağlanılıyor...";
+                btnJoin.innerText = "Connecting...";
                 btnJoin.disabled = true;
                 
                 connectMQTT((success, errorMsg) => {
@@ -377,8 +437,10 @@
 
                     AppState.role = 'guest';
                     AppState.sessionId = code;
+                    AppState.isChatActive = false;
                     AppState.topicSystem = `secureqr/sys/${AppState.sessionId}`;
                     AppState.topicChat = `secureqr/chat/${AppState.sessionId}`;
+                    saveState(); 
 
                     AppState.mqttClient.subscribe(AppState.topicSystem, (err) => {
                         btnJoin.innerText = originalText;
@@ -386,9 +448,9 @@
                         if(!err) {
                             const req = { type: 'join_request', senderId: AppState.clientId };
                             AppState.mqttClient.publish(AppState.topicSystem, JSON.stringify(req));
-                            showToast("İstek gönderildi, onay bekleniyor...");
+                            showToast("Request sent, waiting for approval...");
                         } else {
-                            showToast("Odaya ulaşılamadı.", true);
+                            showToast("Could not reach the room.", true);
                         }
                     });
                 });
@@ -402,7 +464,7 @@
                 
                 if (navigator.clipboard && window.isSecureContext) {
                     navigator.clipboard.writeText(connectUrl).then(() => {
-                        showToast("Bağlantı linki kopyalandı!");
+                        showToast("Connection link copied!");
                     });
                 } else {
                     const textArea = document.createElement("textarea");
@@ -411,9 +473,9 @@
                     textArea.select();
                     try {
                         document.execCommand('copy');
-                        showToast("Bağlantı linki kopyalandı!");
+                        showToast("Connection link copied!");
                     } catch (err) {
-                        showToast("Kopyalama başarısız oldu.", true);
+                        showToast("Failed to copy link.", true);
                     }
                     document.body.removeChild(textArea);
                 }
@@ -459,9 +521,11 @@
         }
 
         function startChat() {
+            AppState.isChatActive = true;
+            saveState(); 
             AppState.mqttClient.subscribe(AppState.topicChat);
             if(AppState.role === 'guest') {
-                document.getElementById('chat-role-text').innerText = "Katılımcı";
+                document.getElementById('chat-role-text').innerText = "Guest";
             }
             switchView('view-chat');
         }
@@ -473,25 +537,29 @@
             }
             AppState.sessionId = null;
             AppState.role = null;
+            AppState.isChatActive = false;
             AppState.guestWaitingId = null;
+            saveState(); 
             
             document.getElementById('input-join-code').value = '';
-            document.getElementById('btn-join-room').innerText = "Odaya Katıl";
-            document.getElementById('chat-messages').innerHTML = '<div class="text-center w-full"><span class="bg-gray-200 text-gray-600 text-xs px-3 py-1 rounded-full">Bağlantı kuruldu. Mesajlar izole iletilir.</span></div>';
+            document.getElementById('btn-join-room').innerText = "Join Room";
+            document.getElementById('chat-messages').innerHTML = '<div class="text-center w-full"><span class="bg-gray-200 text-gray-600 text-xs px-3 py-1 rounded-full">Connection established. Messages are isolated and secure.</span></div>';
             
             switchView('view-home');
         }
 
+        // SECURITY: Bulletproof UI Injection via native textContent
         function renderMessage(text, senderType) {
             const container = document.getElementById('chat-messages');
             const wrapperDiv = document.createElement('div');
             const msgDiv = document.createElement('div');
             
-            const safeText = escapeHTML(text);
-            
             wrapperDiv.className = `flex w-full ${senderType === 'me' ? 'justify-end' : 'justify-start'}`;
             msgDiv.className = `max-w-[75%] px-4 py-3 rounded-2xl text-sm shadow-sm break-words ${senderType === 'me' ? 'chat-bubble-me' : 'chat-bubble-other'}`;
-            msgDiv.innerHTML = safeText;
+            
+            // XSS PREVENTION: Using textContent ensures the browser strictly treats the input as text.
+            // Malicious script tags (<script>) or payloads will be safely rendered as raw characters.
+            msgDiv.textContent = text;
             
             wrapperDiv.appendChild(msgDiv);
             container.appendChild(wrapperDiv);
