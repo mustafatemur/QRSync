@@ -3,207 +3,254 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- SECURITY: Strict Content Security Policy (Updated for Data URIs and Unpkg) -->
+    <!-- SECURITY: Strict Content Security Policy -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://unpkg.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' wss://broker.emqx.io:8084 wss://broker.hivemq.com:8443 wss://test.mosquitto.org:8081;">
-    <title>QRSync - Secure Terminal</title>
+    <title>Nexus - Secure Terminal</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Tailwind Dark Mode Config -->
     <script>
         tailwind.config = { darkMode: 'class' }
     </script>
-    <!-- QRCode.js (For generating QR) -->
+    <!-- QRCode.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <!-- MQTT.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/4.3.7/mqtt.min.js"></script>
-    <!-- HTML5-QRCode (For Camera Barcode Scanning) -->
+    <!-- HTML5-QRCode -->
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     
     <style>
-        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.90);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-        .dark .glass-panel {
-            background: rgba(31, 41, 55, 0.90);
-            border: 1px solid rgba(75, 85, 99, 0.4);
-        }
-        .chat-bubble-me {
-            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-            color: white;
-            border-bottom-right-radius: 0;
-        }
-        .chat-bubble-other {
-            background: #f3f4f6;
-            color: #1f2937;
-            border-bottom-left-radius: 0;
-        }
-        .dark .chat-bubble-other {
-            background: #374151;
-            color: #e5e7eb;
+        body { 
+            font-family: 'Inter', system-ui, sans-serif; 
+            -webkit-tap-highlight-color: transparent; 
         }
         /* Custom scrollbar */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        .dark ::-webkit-scrollbar-thumb { background: #4b5563; }
+        ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 10px; }
+        .dark ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); }
         
-        #reader { width: 100%; border-radius: 1rem; overflow: hidden; border: none !important; }
-        #reader video { border-radius: 1rem; object-fit: cover; }
+        /* WhatsApp-like Chat Bubbles */
+        .chat-bubble-me {
+            background-color: #dcf8c6;
+            color: #111b21;
+            border-top-right-radius: 4px !important;
+        }
+        .dark .chat-bubble-me {
+            background-color: #005c4b;
+            color: #e9edef;
+        }
+        .chat-bubble-other {
+            background-color: #ffffff;
+            color: #111b21;
+            border-top-left-radius: 4px !important;
+        }
+        .dark .chat-bubble-other {
+            background-color: #202c33;
+            color: #e9edef;
+        }
+
+        /* Chat Wallpaper Background */
+        .chat-bg {
+            background-color: #efeae2;
+            background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20.5V18H0v-2h20v-2H0v-2h20v-2H0V8h20V6H0V4h20V2H0V0h22v20h2V0h2v20h2V0h2v20h2V0h2v20h2V0h2v20h2v2H20v-1.5zM0 20h2v20H0V20zm4 0h2v20H4V20zm4 0h2v20H8V20zm4 0h2v20h-2V20zm4 0h2v20h-2V20zm4 4h20v2H20v-2zm0 4h20v2H20v-2zm0 4h20v2H20v-2zm0 4h20v2H20v-2z' fill='%23000000' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
+        }
+        .dark .chat-bg {
+            background-color: #0b141a;
+            background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20.5V18H0v-2h20v-2H0v-2h20v-2H0V8h20V6H0V4h20V2H0V0h22v20h2V0h2v20h2V0h2v20h2V0h2v20h2V0h2v20h2v2H20v-1.5zM0 20h2v20H0V20zm4 0h2v20H4V20zm4 0h2v20H8V20zm4 0h2v20h-2V20zm4 0h2v20h-2V20zm4 4h20v2H20v-2zm0 4h20v2H20v-2zm0 4h20v2H20v-2zm0 4h20v2H20v-2z' fill='%23ffffff' fill-opacity='0.02' fill-rule='evenodd'/%3E%3C/svg%3E");
+        }
     </style>
 </head>
-<body class="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 min-h-screen flex items-center justify-center p-4 transition-colors duration-500">
+<body class="bg-gray-50 dark:bg-gray-900 h-[100dvh] w-full flex flex-col overflow-hidden text-gray-800 dark:text-gray-200 transition-colors duration-300">
 
-    <!-- Top Right Controls (Dark Mode Toggle) -->
+    <!-- Theme Toggle -->
     <div class="fixed top-4 right-4 z-50">
-        <button id="btn-theme-toggle" class="p-2 bg-white/20 hover:bg-white/40 dark:bg-gray-800/50 dark:hover:bg-gray-700 backdrop-blur-md rounded-full text-white transition-all shadow-lg">
+        <button id="btn-theme-toggle" class="p-2 bg-gray-200/50 hover:bg-gray-300/50 dark:bg-gray-800/50 dark:hover:bg-gray-700 backdrop-blur-md rounded-full text-gray-700 dark:text-gray-200 transition-all shadow-sm">
             <svg id="icon-sun" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
             <svg id="icon-moon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
         </button>
     </div>
 
-    <!-- HOME VIEW -->
-    <div id="view-home" class="w-full max-w-md glass-panel rounded-3xl shadow-2xl p-8 text-center transition-all duration-300">
-        <div class="mb-6 text-indigo-600 dark:text-indigo-400">
-            <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+    <!-- VIEW 1: HOME (Native App Layout) -->
+    <div id="view-home" class="flex-1 flex flex-col items-center justify-center p-6 w-full max-w-md mx-auto h-full">
+        <div class="mb-8 text-teal-600 dark:text-teal-400">
+            <svg class="w-20 h-20 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
         </div>
-        <h1 class="text-3xl font-bold text-gray-800 dark:text-white mb-2">QRSync</h1>
-        <p class="text-gray-500 dark:text-gray-400 text-sm mb-8">E2E Encrypted Terminal Connection.</p>
+        <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight">Nexus</h1>
+        <p class="text-gray-500 dark:text-gray-400 text-sm mb-10 text-center">Fast & Secure P2P Communication.</p>
         
-        <button id="btn-create-room" class="w-full mb-6 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold py-3 px-4 rounded-xl shadow-lg transform transition active:scale-95 flex justify-center items-center">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-            <span>Create Secure Room</span>
+        <button id="btn-create-room" class="w-full mb-8 bg-teal-600 hover:bg-teal-700 text-white font-bold py-4 px-4 rounded-xl shadow-lg transform transition active:scale-95 flex justify-center items-center text-lg">
+            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            <span>Create Secure Node</span>
         </button>
 
-        <div class="relative flex py-3 items-center">
-            <div class="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
-            <span class="flex-shrink-0 mx-4 text-gray-400 dark:text-gray-500 text-sm font-medium">OR JOIN WITH CODE</span>
-            <div class="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
+        <div class="w-full relative flex items-center mb-8">
+            <div class="flex-grow border-t border-gray-300 dark:border-gray-700"></div>
+            <span class="flex-shrink-0 mx-4 text-gray-400 dark:text-gray-500 text-xs font-bold tracking-wider">OR JOIN VIA CODE</span>
+            <div class="flex-grow border-t border-gray-300 dark:border-gray-700"></div>
         </div>
 
-        <div class="mt-4 space-y-3">
-            <input type="text" id="input-join-code" maxlength="7" class="w-full px-4 py-3 text-center text-2xl tracking-widest font-mono rounded-xl border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition uppercase" placeholder="_______">
-            <button id="btn-join-room" class="w-full bg-white dark:bg-gray-800 border-2 border-indigo-500 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-gray-700 font-bold py-3 px-4 rounded-xl shadow-sm transform transition active:scale-95">
-                Join Securely
+        <div class="w-full space-y-4">
+            <div class="flex space-x-2 w-full">
+                <!-- New: Scan QR Button on Home Screen -->
+                <button id="btn-home-scan" title="Scan QR Code" class="bg-gray-100 dark:bg-gray-800 text-teal-600 dark:text-teal-400 px-4 rounded-xl shadow-sm border border-gray-300 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700 transition active:scale-95 shrink-0 flex items-center justify-center">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                </button>
+                <input type="text" id="input-join-code" maxlength="7" class="w-full px-4 py-4 text-center text-2xl tracking-[0.3em] font-mono rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none transition uppercase shadow-sm" placeholder="_______">
+            </div>
+            
+            <button id="btn-join-room" class="w-full bg-white dark:bg-gray-800 border-2 border-teal-500 text-teal-600 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-gray-700 font-bold py-4 px-4 rounded-xl shadow-sm transform transition active:scale-95 text-lg">
+                Connect Device
             </button>
         </div>
     </div>
 
-    <!-- HOST WAITING VIEW -->
-    <div id="view-waiting" class="hidden w-full max-w-md glass-panel rounded-3xl shadow-2xl p-8 text-center transition-all duration-300">
-        <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-2">Waiting for Connection</h2>
-        <p class="text-gray-500 dark:text-gray-400 text-sm mb-6">Scan QR or share the code.</p>
+    <!-- VIEW 2: HOST WAITING -->
+    <div id="view-waiting" class="hidden flex-1 flex-col items-center justify-center p-6 w-full max-w-md mx-auto h-full">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Node Active</h2>
+        <p class="text-gray-500 dark:text-gray-400 text-center mb-8">Scan QR or share the link with the guest device.</p>
         
-        <div class="flex flex-col items-center justify-center bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-inner mx-auto w-max mb-6">
-            <div id="qrcode" class="mb-4 bg-white p-2 rounded-xl"></div>
-            <div class="text-center">
-                <span class="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wider block mb-1">E2E Session Code</span>
-                <span id="display-session-code" class="text-2xl font-mono font-bold text-indigo-600 dark:text-indigo-400 tracking-widest block mb-3"></span>
-                <button id="btn-copy-link" class="text-sm bg-indigo-50 dark:bg-gray-700 hover:bg-indigo-100 dark:hover:bg-gray-600 text-indigo-600 dark:text-indigo-300 py-1.5 px-4 rounded-lg font-medium transition flex items-center justify-center mx-auto active:scale-95">
-                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                    Copy Link
-                </button>
-            </div>
+        <div class="bg-white p-4 rounded-2xl shadow-md mb-8 w-max mx-auto border border-gray-100 dark:border-gray-800">
+            <div id="qrcode" class="bg-white p-2"></div>
         </div>
         
-        <div id="waiting-spinner" class="flex items-center justify-center space-x-2 mb-6">
-            <span class="w-3 h-3 rounded-full bg-yellow-400 animate-pulse"></span>
-            <span class="text-yellow-600 dark:text-yellow-500 font-medium text-sm">Listening for requests...</span>
+        <div class="text-center w-full mb-8">
+            <span class="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-widest block mb-1">Session Code</span>
+            <span id="display-session-code" class="text-3xl font-mono font-bold text-teal-600 dark:text-teal-400 tracking-[0.2em] block mb-4"></span>
+            
+            <button id="btn-copy-link" class="text-sm bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 py-2 px-6 rounded-full font-bold transition flex items-center justify-center mx-auto active:scale-95">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                Copy Link
+            </button>
+        </div>
+        
+        <div id="waiting-spinner" class="flex flex-col items-center justify-center space-y-3 mb-6 w-full">
+            <div class="flex space-x-2">
+                <div class="w-2.5 h-2.5 bg-teal-500 rounded-full animate-bounce"></div>
+                <div class="w-2.5 h-2.5 bg-teal-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                <div class="w-2.5 h-2.5 bg-teal-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+            </div>
+            <span class="text-gray-500 dark:text-gray-400 font-medium text-sm">Waiting for incoming connection...</span>
         </div>
 
-        <div id="area-room-permission" class="hidden bg-indigo-50 dark:bg-gray-800 border border-indigo-100 dark:border-gray-700 rounded-2xl p-5 mb-6 shadow-sm w-full transition-all duration-300 transform scale-95 opacity-0">
-            <div class="flex items-center justify-center mb-4">
-                <div class="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center text-indigo-600 dark:text-indigo-400 mr-3">
+        <!-- Inline Permission Request -->
+        <div id="area-room-permission" class="hidden w-full bg-white dark:bg-gray-800 border border-teal-200 dark:border-gray-700 rounded-2xl p-5 shadow-lg transform transition-all duration-300">
+            <div class="flex items-center mb-4">
+                <div class="w-12 h-12 bg-teal-100 dark:bg-teal-900/50 rounded-full flex items-center justify-center text-teal-600 dark:text-teal-400 mr-4">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4"></path></svg>
                 </div>
-                <div class="text-left">
-                    <h4 class="font-bold text-gray-800 dark:text-white text-sm">Connection Request</h4>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">A device wants to join.</p>
+                <div>
+                    <h4 class="font-bold text-gray-900 dark:text-white text-base leading-tight" id="permission-name">Someone wants to connect.</h4>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Identity verification required.</p>
                 </div>
             </div>
-            <div class="flex space-x-2">
-                <button id="btn-reject" class="flex-1 py-2 px-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-white font-bold rounded-xl transition text-sm">Reject</button>
-                <button id="btn-approve" class="flex-1 py-2 px-3 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl shadow-md transition text-sm">Approve</button>
+            <div class="flex space-x-3 w-full">
+                <button id="btn-reject" class="flex-1 py-2.5 px-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-white font-bold rounded-xl transition text-sm">Deny</button>
+                <button id="btn-approve" class="flex-1 py-2.5 px-3 bg-teal-500 hover:bg-teal-600 text-white font-bold rounded-xl shadow-md transition text-sm">Accept</button>
             </div>
         </div>
 
-        <button id="btn-cancel-waiting" class="text-sm text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition underline">Cancel & Return</button>
+        <button id="btn-cancel-waiting" class="mt-8 text-sm text-red-500 dark:text-red-400 hover:underline transition font-bold">End Session</button>
     </div>
 
-    <!-- CHAT / TERMINAL VIEW -->
-    <div id="view-chat" class="hidden w-full max-w-2xl h-[85vh] flex flex-col glass-panel rounded-3xl shadow-2xl overflow-hidden transition-all duration-300">
+    <!-- VIEW 3: CHAT / TERMINAL (WhatsApp Style Fullscreen) -->
+    <div id="view-chat" class="hidden h-[100dvh] w-full flex-col chat-bg transition-colors duration-300">
         
         <!-- Header -->
-        <div class="bg-white dark:bg-gray-800 px-6 py-4 border-b dark:border-gray-700 flex justify-between items-center shadow-sm z-10">
+        <header class="bg-[#f0f2f5] dark:bg-[#202c33] px-4 py-3 flex justify-between items-center shadow-sm shrink-0 z-10">
             <div class="flex items-center space-x-3">
-                <div class="w-3 h-3 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]"></div>
-                <div>
-                    <h3 class="font-bold text-gray-800 dark:text-white leading-tight flex items-center">
-                        QRSync Terminal
-                        <svg class="w-4 h-4 ml-1 text-green-500" fill="currentColor" viewBox="0 0 20 20" title="AES-256 Encrypted"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path></svg>
-                    </h3>
-                    <p class="text-xs text-gray-500 dark:text-gray-400" id="chat-role-text">AES-256 E2EE Active</p>
+                <div class="w-10 h-10 rounded-full bg-teal-500 text-white flex items-center justify-center font-bold text-lg shadow-sm" id="chat-avatar">
+                    ?
+                </div>
+                <div class="flex flex-col">
+                    <h3 class="font-bold text-gray-900 dark:text-white leading-tight text-lg" id="chat-title">Unknown User</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 flex items-center">
+                        <svg class="w-3 h-3 mr-1 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path></svg>
+                        E2EE Active
+                    </p>
                 </div>
             </div>
-            <button id="btn-leave-chat" class="text-red-500 hover:bg-red-50 dark:hover:bg-gray-700 p-2 rounded-lg transition" title="Disconnect">
+            <button id="btn-leave-chat" class="text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 p-2 rounded-full transition" title="Disconnect">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
             </button>
-        </div>
-
-        <!-- Camera Scanner Area (Hidden by default) -->
-        <div id="scanner-container" class="hidden bg-black w-full relative">
-            <div id="reader"></div>
-            <button id="btn-close-scanner" class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 shadow-lg">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-        </div>
+        </header>
 
         <!-- Messages Area -->
-        <div id="chat-messages" class="flex-1 p-6 overflow-y-auto bg-gray-50/50 dark:bg-gray-900/50 space-y-4 flex flex-col relative">
-            <div class="text-center w-full">
-                <span class="bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs px-3 py-1 rounded-full">Encrypted connection established.</span>
+        <main id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 relative flex flex-col w-full max-w-4xl mx-auto">
+            <div class="text-center w-full my-2">
+                <span class="bg-[#ffeecd] dark:bg-[#182229] text-gray-700 dark:text-[#ffd279] text-xs px-3 py-1.5 rounded-lg shadow-sm inline-block max-w-xs leading-relaxed text-center">
+                    🔒 Messages are end-to-end encrypted. No one outside of this chat can read or listen to them.
+                </span>
             </div>
-            <!-- Typing Indicator -->
-            <div id="typing-indicator" class="hidden absolute bottom-2 left-6 bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-xs px-3 py-1.5 rounded-full flex items-center space-x-1">
-                <span>Typing</span>
-                <span class="w-1 h-1 bg-gray-500 dark:bg-gray-400 rounded-full animate-bounce"></span>
-                <span class="w-1 h-1 bg-gray-500 dark:bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></span>
-                <span class="w-1 h-1 bg-gray-500 dark:bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.4s"></span>
+            <!-- Typing Indicator (Absolute to bottom left) -->
+            <div id="typing-indicator" class="hidden self-start bg-white dark:bg-[#202c33] text-gray-500 dark:text-gray-400 text-xs px-4 py-2 rounded-2xl rounded-tl-sm shadow-sm flex items-center space-x-1 w-max">
+                <span id="typing-name" class="font-medium mr-1">User</span>
+                <span>is typing</span>
+                <span class="w-1 h-1 bg-gray-400 rounded-full animate-bounce mx-0.5"></span>
+                <span class="w-1 h-1 bg-gray-400 rounded-full animate-bounce mx-0.5" style="animation-delay: 0.2s"></span>
+                <span class="w-1 h-1 bg-gray-400 rounded-full animate-bounce mx-0.5" style="animation-delay: 0.4s"></span>
             </div>
-        </div>
+        </main>
 
-        <!-- Input Area -->
-        <div class="bg-white dark:bg-gray-800 p-4 border-t dark:border-gray-700 relative">
-            <!-- Hidden File Input for images -->
-            <input type="file" id="file-input" accept="image/*" class="hidden">
-            
-            <form id="form-chat" class="flex items-center space-x-2">
-                <!-- Attach Photo Btn -->
-                <button type="button" id="btn-attach" class="text-gray-400 hover:text-indigo-500 dark:hover:text-indigo-400 p-2 transition">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
+        <!-- Input Footer -->
+        <footer class="bg-[#f0f2f5] dark:bg-[#202c33] p-2 shrink-0">
+            <div class="max-w-4xl mx-auto flex items-end space-x-2">
+                <!-- Hidden File Input -->
+                <input type="file" id="file-input" accept="image/jpeg, image/png, image/webp" class="hidden">
+                
+                <button type="button" id="btn-attach" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 p-3 transition shrink-0">
+                    <svg class="w-6 h-6 transform rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
                 </button>
-                <!-- Camera Barcode Btn -->
-                <button type="button" id="btn-camera" class="text-gray-400 hover:text-indigo-500 dark:hover:text-indigo-400 p-2 transition">
+                
+                <button type="button" id="btn-camera" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 p-3 transition shrink-0">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                 </button>
 
-                <input type="text" id="input-chat" maxlength="2000" class="flex-1 px-4 py-3 bg-gray-50 dark:bg-gray-700 dark:text-white rounded-xl border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition" placeholder="Message or barcode..." autocomplete="off">
+                <form id="form-chat" class="flex-1 flex items-end bg-white dark:bg-[#2a3942] rounded-2xl shadow-sm border border-transparent focus-within:border-teal-500 overflow-hidden">
+                    <textarea id="input-chat" rows="1" maxlength="2000" class="flex-1 max-h-32 px-4 py-3 bg-transparent text-gray-900 dark:text-white outline-none resize-none" placeholder="Type a message..."></textarea>
+                </form>
                 
-                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl p-3 font-bold shadow-md transition transform active:scale-95 flex items-center justify-center">
-                    <svg class="w-5 h-5 transform rotate-90" fill="currentColor" viewBox="0 0 20 20"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path></svg>
+                <button type="submit" id="btn-send-msg" class="bg-teal-500 hover:bg-teal-600 text-white rounded-full p-3.5 shadow-md transition transform active:scale-95 shrink-0 flex items-center justify-center h-12 w-12">
+                    <svg class="w-5 h-5 ml-1" fill="currentColor" viewBox="0 0 20 20"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path></svg>
                 </button>
-            </form>
+            </div>
+        </footer>
+    </div>
+
+    <!-- VIEW 4: FULLSCREEN SCANNER OVERLAY -->
+    <div id="view-scanner" class="hidden fixed inset-0 z-[100] bg-black flex-col">
+        <div class="h-16 flex items-center justify-between px-4 bg-gray-900 text-white shrink-0 shadow-lg">
+            <span id="scanner-title" class="font-bold text-lg">Scan Barcode / QR</span>
+            <button id="btn-close-scanner" class="p-2 hover:bg-gray-800 rounded-full transition">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        <div class="flex-1 w-full relative">
+            <div id="reader" class="w-full h-full object-cover"></div>
+            <div class="absolute inset-0 border-[10px] border-black/40 pointer-events-none flex items-center justify-center">
+                <div class="w-64 h-64 border-2 border-teal-500 rounded-xl animate-pulse"></div>
+            </div>
         </div>
     </div>
 
     <!-- NOTIFICATION TOAST -->
-    <div id="toast" class="fixed bottom-4 right-4 bg-gray-800 dark:bg-gray-700 text-white px-6 py-3 rounded-xl shadow-2xl transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center pointer-events-none">
+    <div id="toast" class="fixed top-4 left-1/2 transform -translate-x-1/2 bg-gray-800 dark:bg-gray-700 text-white px-6 py-3 rounded-full shadow-2xl -translate-y-20 opacity-0 transition-all duration-300 z-[200] flex items-center pointer-events-none text-sm font-bold">
         <span id="toast-msg">Notification</span>
     </div>
 
     <script>
+        /* =========================================
+           0. INVENTOR NAMES (Identity Assignment)
+           ========================================= */
+        const INVENTORS = [
+            "Nikola Tesla", "Marie Curie", "Thomas Edison", "Ada Lovelace", 
+            "Alan Turing", "Albert Einstein", "Alexander Bell", "Galileo Galilei", 
+            "Isaac Newton", "Grace Hopper", "Hedy Lamarr", "Johannes Gutenberg"
+        ];
+
+        function getRandomInventor() {
+            return INVENTORS[Math.floor(Math.random() * INVENTORS.length)];
+        }
+
         /* =========================================
            1. CRYPTOGRAPHY (AES-256 E2EE)
            ========================================= */
@@ -215,13 +262,13 @@
                 "raw", enc.encode(sessionCode), {name: "PBKDF2"}, false, ["deriveBits", "deriveKey"]
             );
             return window.crypto.subtle.deriveKey(
-                { name: "PBKDF2", salt: enc.encode("qrsync_secure_salt_v1"), iterations: 100000, hash: "SHA-256" },
+                { name: "PBKDF2", salt: enc.encode("nexus_secure_salt_v1"), iterations: 100000, hash: "SHA-256" },
                 keyMaterial, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]
             );
         }
 
         async function encryptData(text) {
-            if (!cryptoKey) return text; // Fallback if crypto fails, though prevented logically
+            if (!cryptoKey) return text;
             try {
                 const iv = window.crypto.getRandomValues(new Uint8Array(12));
                 const enc = new TextEncoder();
@@ -229,7 +276,6 @@
                 const payload = new Uint8Array(iv.byteLength + ciphertext.byteLength);
                 payload.set(iv, 0);
                 payload.set(new Uint8Array(ciphertext), iv.byteLength);
-                // Convert to Base64 safely
                 let binary = '';
                 payload.forEach(b => binary += String.fromCharCode(b));
                 return btoa(binary);
@@ -251,7 +297,6 @@
                 const decrypted = await window.crypto.subtle.decrypt({name: "AES-GCM", iv: iv}, cryptoKey, data);
                 return new TextDecoder().decode(decrypted);
             } catch (e) {
-                console.error("Decryption failed (Wrong Key or Corrupted)", e);
                 return "[Encrypted Message - Unreadable]";
             }
         }
@@ -264,7 +309,6 @@
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
                 const osc = ctx.createOscillator();
                 const gain = ctx.createGain();
-                
                 osc.connect(gain);
                 gain.connect(ctx.destination);
                 
@@ -272,7 +316,7 @@
                     osc.type = 'sine';
                     osc.frequency.setValueAtTime(880, ctx.currentTime);
                     osc.frequency.exponentialRampToValueAtTime(1760, ctx.currentTime + 0.1);
-                    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                    gain.gain.setValueAtTime(0.05, ctx.currentTime);
                     gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
                     osc.start(ctx.currentTime);
                     osc.stop(ctx.currentTime + 0.1);
@@ -281,18 +325,17 @@
                     osc.frequency.setValueAtTime(440, ctx.currentTime);
                     osc.frequency.setValueAtTime(554.37, ctx.currentTime + 0.1);
                     osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.2);
-                    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                    gain.gain.setValueAtTime(0.05, ctx.currentTime);
                     gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
                     osc.start(ctx.currentTime);
                     osc.stop(ctx.currentTime + 0.3);
                 }
-            } catch(e) {} // Ignore if browser blocks auto-play audio
+            } catch(e) {} 
         }
 
         /* =========================================
            3. UI & STATE MANAGEMENT
            ========================================= */
-        // Dark Mode Logic
         const htmlEl = document.documentElement;
         const btnTheme = document.getElementById('btn-theme-toggle');
         const iconSun = document.getElementById('icon-sun');
@@ -323,18 +366,26 @@
             const toast = document.getElementById('toast');
             document.getElementById('toast-msg').innerText = message;
             toast.style.backgroundColor = isError ? '#ef4444' : (htmlEl.classList.contains('dark') ? '#374151' : '#1f2937');
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 4000);
+            toast.classList.remove('-translate-y-20', 'opacity-0');
+            setTimeout(() => toast.classList.add('-translate-y-20', 'opacity-0'), 4000);
         }
 
         function switchView(viewId) {
-            ['view-home', 'view-waiting', 'view-chat'].forEach(id => document.getElementById(id).classList.add('hidden'));
-            document.getElementById(viewId).classList.remove('hidden');
+            ['view-home', 'view-waiting', 'view-chat', 'view-scanner'].forEach(id => {
+                const el = document.getElementById(id);
+                el.classList.add('hidden');
+                el.classList.remove('flex');
+            });
+            const target = document.getElementById(viewId);
+            target.classList.remove('hidden');
+            target.classList.add('flex');
         }
 
-        const savedState = sessionStorage.getItem('qrsync_state_v2');
+        const savedState = sessionStorage.getItem('nexus_state_v4');
         const defaultState = {
             clientId: 'cli_' + Math.random().toString(36).substr(2, 9),
+            myName: getRandomInventor(),
+            otherName: 'Unknown',
             sessionId: null, role: null, isChatActive: false, chatHistory: [] 
         };
         
@@ -343,9 +394,9 @@
             { ...defaultState, mqtt: null };
 
         function saveState() {
-            sessionStorage.setItem('qrsync_state_v2', JSON.stringify({
-                clientId: AppState.clientId, sessionId: AppState.sessionId,
-                role: AppState.role, isChatActive: AppState.isChatActive, chatHistory: AppState.chatHistory
+            sessionStorage.setItem('nexus_state_v4', JSON.stringify({
+                clientId: AppState.clientId, myName: AppState.myName, otherName: AppState.otherName,
+                sessionId: AppState.sessionId, role: AppState.role, isChatActive: AppState.isChatActive, chatHistory: AppState.chatHistory
             }));
         }
 
@@ -353,7 +404,12 @@
             const connectUrl = `${window.location.href.split('?')[0]}?session=${sessionId}`;
             const qrContainer = document.getElementById("qrcode");
             qrContainer.innerHTML = '';
-            new QRCode(qrContainer, { text: connectUrl, width: 180, height: 180, colorDark: "#1e1b4b", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.H });
+            new QRCode(qrContainer, { text: connectUrl, width: 220, height: 220, colorDark: "#0f172a", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.H });
+        }
+
+        function updateChatHeader() {
+            document.getElementById('chat-title').innerText = AppState.otherName;
+            document.getElementById('chat-avatar').innerText = AppState.otherName.charAt(0);
         }
 
         /* =========================================
@@ -365,16 +421,13 @@
             
             if (AppState.mqtt) AppState.mqtt.end();
             const brokers = ['wss://broker.hivemq.com:8443/mqtt', 'wss://broker.emqx.io:8084/mqtt', 'wss://test.mosquitto.org:8081/mqtt'];
-            
             let isResolved = false;
 
             function tryConnect(idx) {
                 if (idx >= brokers.length) return isResolved || (isResolved = true, callback(false, "Network blocks WebSockets."));
-                
                 try {
                     const client = mqtt.connect(brokers[idx], { connectTimeout: 4000, reconnectPeriod: 2000, keepalive: 30 });
                     let timer = setTimeout(() => { if (!client.connected && !isResolved) { client.end(); tryConnect(idx + 1); } }, 4500);
-
                     client.on('connect', () => {
                         clearTimeout(timer);
                         if (!isResolved) {
@@ -401,35 +454,38 @@
             if (topic === sysTopic) {
                 if (AppState.role === 'host' && data.type === 'join_request') {
                     AppState.guestWaitingId = data.senderId;
+                    AppState.otherName = data.senderName || "Unknown Guest";
+                    document.getElementById('permission-name').innerText = `${AppState.otherName} wants to connect.`;
                     showApprovalModal();
                     playSound('msg');
                 } 
                 else if (AppState.role === 'guest' && data.type === 'join_response' && data.targetId === AppState.clientId) {
                     if (data.status === 'accepted') {
-                        showToast("Connection Approved!");
+                        AppState.otherName = data.senderName || "Unknown Host";
+                        showToast(`Connected to ${AppState.otherName}!`);
                         playSound('success');
                         startChat();
-                    } else { showToast("Rejected.", true); resetApp(); }
+                    } else { showToast("Connection Rejected.", true); resetApp(); }
                 }
                 else if (data.type === 'typing') {
                     const ind = document.getElementById('typing-indicator');
-                    if (data.status === 'start') { ind.classList.remove('hidden'); }
-                    else { ind.classList.add('hidden'); }
+                    document.getElementById('typing-name').innerText = AppState.otherName;
+                    if (data.status === 'start') { ind.classList.remove('hidden'); ind.classList.add('flex'); scrollChatToBottom(); }
+                    else { ind.classList.add('hidden'); ind.classList.remove('flex'); }
                 }
-                else if (data.type === 'leave') { showToast("Other device disconnected.", true); resetApp(); }
+                else if (data.type === 'leave') { showToast(`${AppState.otherName} disconnected.`, true); resetApp(); }
             }
             else if (topic === chatTopic && data.type === 'chat') {
                 const ind = document.getElementById('typing-indicator');
-                ind.classList.add('hidden'); // hide typing when msg arrives
+                ind.classList.add('hidden'); ind.classList.remove('flex');
                 
-                // DECRYPT DATA
                 const decryptedStr = await decryptData(data.payload);
                 if (decryptedStr) {
                     try {
                         const parsedPayload = JSON.parse(decryptedStr);
                         renderMessage(parsedPayload, 'other');
                         playSound('msg');
-                    } catch(e) {} // Ignore malformed JSON
+                    } catch(e) {} 
                 }
             }
         }
@@ -451,27 +507,36 @@
         function renderMessage(payload, senderType, shouldSave = true) {
             const container = document.getElementById('chat-messages');
             const wrapper = document.createElement('div');
-            wrapper.className = `flex w-full ${senderType === 'me' ? 'justify-end' : 'justify-start'} z-10 relative`;
+            wrapper.className = `flex w-full ${senderType === 'me' ? 'justify-end' : 'justify-start'} z-10 relative mb-2`;
             
             const msgDiv = document.createElement('div');
-            msgDiv.className = `max-w-[75%] px-4 py-3 rounded-2xl text-sm shadow-sm break-words ${senderType === 'me' ? 'chat-bubble-me' : 'chat-bubble-other'}`;
+            msgDiv.className = `max-w-[80%] px-3 py-2 rounded-xl text-[15px] shadow-sm break-words relative ${senderType === 'me' ? 'chat-bubble-me' : 'chat-bubble-other'}`;
             
             if (payload.type === 'text') {
                 msgDiv.textContent = payload.data;
             } else if (payload.type === 'image') {
                 const img = document.createElement('img');
                 img.src = payload.data;
-                img.className = 'rounded-lg max-w-full h-auto mt-1 cursor-pointer';
+                img.className = 'rounded-md max-w-full h-auto cursor-pointer object-cover max-h-64';
                 img.onclick = () => {
                     const w = window.open("");
-                    w.document.write(`<img src="${payload.data}" style="max-width:100%;">`);
+                    w.document.write(`<body style="margin:0;background:#000;display:flex;align-items:center;justify-content:center;height:100vh;"><img src="${payload.data}" style="max-width:100%;max-height:100vh;"></body>`);
                 };
                 msgDiv.appendChild(img);
             }
             
+            const timeSpan = document.createElement('span');
+            const now = new Date();
+            timeSpan.textContent = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+            timeSpan.className = `block text-[10px] text-right mt-1 opacity-70 ${senderType === 'me' ? 'text-gray-700 dark:text-gray-200' : 'text-gray-500'}`;
+            msgDiv.appendChild(timeSpan);
+
             wrapper.appendChild(msgDiv);
-            container.appendChild(wrapper);
-            container.scrollTop = container.scrollHeight;
+            
+            const typingInd = document.getElementById('typing-indicator');
+            container.insertBefore(wrapper, typingInd);
+            
+            scrollChatToBottom();
 
             if (shouldSave) {
                 AppState.chatHistory.push({ payload, senderType });
@@ -479,71 +544,115 @@
             }
         }
 
+        function scrollChatToBottom() {
+            const container = document.getElementById('chat-messages');
+            container.scrollTop = container.scrollHeight;
+        }
+
         function loadChatHistory() {
             const container = document.getElementById('chat-messages');
-            container.innerHTML = '<div class="text-center w-full"><span class="bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs px-3 py-1 rounded-full">Encrypted connection established.</span></div><div id="typing-indicator" class="hidden absolute bottom-2 left-6 bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-xs px-3 py-1.5 rounded-full flex items-center space-x-1"><span>Typing</span><span class="w-1 h-1 bg-gray-500 dark:bg-gray-400 rounded-full animate-bounce"></span><span class="w-1 h-1 bg-gray-500 dark:bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></span><span class="w-1 h-1 bg-gray-500 dark:bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.4s"></span></div>';
+            container.innerHTML = `
+            <div class="text-center w-full my-2">
+                <span class="bg-[#ffeecd] dark:bg-[#182229] text-gray-700 dark:text-[#ffd279] text-xs px-3 py-1.5 rounded-lg shadow-sm inline-block max-w-xs leading-relaxed text-center">
+                    🔒 Messages are end-to-end encrypted. No one outside of this chat can read or listen to them.
+                </span>
+            </div>
+            <div id="typing-indicator" class="hidden self-start bg-white dark:bg-[#202c33] text-gray-500 dark:text-gray-400 text-xs px-4 py-2 rounded-2xl rounded-tl-sm shadow-sm items-center space-x-1 w-max mt-2">
+                <span id="typing-name" class="font-medium mr-1">User</span>
+                <span>is typing</span>
+                <span class="w-1 h-1 bg-gray-400 rounded-full animate-bounce mx-0.5"></span>
+                <span class="w-1 h-1 bg-gray-400 rounded-full animate-bounce mx-0.5" style="animation-delay: 0.2s"></span>
+                <span class="w-1 h-1 bg-gray-400 rounded-full animate-bounce mx-0.5" style="animation-delay: 0.4s"></span>
+            </div>`;
             
             AppState.chatHistory.forEach(item => renderMessage(item.payload, item.senderType, false));
         }
 
-        // Image Attachment (Compress to Base64)
+        // Image Attachment (Security limits applied)
         document.getElementById('btn-attach').addEventListener('click', () => document.getElementById('file-input').click());
         document.getElementById('file-input').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
+            // Strict check for image only
+            if (!file.type.startsWith('image/')) return showToast("Invalid file type.", true);
+            
             const reader = new FileReader();
             reader.onload = function(event) {
                 const img = new Image();
                 img.onload = function() {
                     const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 800;
+                    const MAX_WIDTH = 800; // Limit rendering size to protect memory
                     const scaleSize = MAX_WIDTH / img.width;
-                    canvas.width = MAX_WIDTH;
-                    canvas.height = img.height * scaleSize;
+                    canvas.width = Math.min(MAX_WIDTH, img.width);
+                    canvas.height = img.width > MAX_WIDTH ? img.height * scaleSize : img.height;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    // Compress as JPEG
                     const base64Img = canvas.toDataURL('image/jpeg', 0.6); 
                     sendEncryptedMessage({ type: 'image', data: base64Img });
                 }
                 img.src = event.target.result;
             }
             reader.readAsDataURL(file);
-            e.target.value = ''; // Reset
+            e.target.value = ''; 
         });
 
-        // HTML5 QR Scanner
+        // Fullscreen HTML5 QR Scanner
         let html5QrcodeScanner = null;
-        document.getElementById('btn-camera').addEventListener('click', () => {
+        let scannerMode = 'chat'; // 'join' or 'chat'
+
+        function openScanner(mode) {
             if (typeof Html5Qrcode === 'undefined') return showToast("Scanner library not loaded.", true);
-            const container = document.getElementById('scanner-container');
-            if (container.classList.contains('hidden')) {
-                container.classList.remove('hidden');
-                html5QrcodeScanner = new Html5Qrcode("reader");
-                html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } }, 
-                (decodedText) => {
-                    // Send scanned data instantly!
-                    sendEncryptedMessage({ type: 'text', data: `[SCANNED]: ${decodedText}` });
-                    playSound('success');
-                    // auto close scanner after scan
-                    document.getElementById('btn-close-scanner').click();
-                }, (error) => {}).catch(err => {
-                    container.classList.add('hidden');
-                    showToast("Camera permission denied.", true);
-                });
-            }
-        });
-        document.getElementById('btn-close-scanner').addEventListener('click', () => {
+            scannerMode = mode;
+            document.getElementById('scanner-title').innerText = mode === 'join' ? "Scan QR to Join" : "Scan Barcode / QR";
+            switchView('view-scanner'); 
+            
+            html5QrcodeScanner = new Html5Qrcode("reader");
+            html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } }, 
+            (decodedText) => {
+                playSound('success');
+                closeScanner();
+
+                if (scannerMode === 'join') {
+                    // Security Regex: Extract the 7-character session code from URL or pure text
+                    const match = decodedText.match(/[?&]session=([A-Z0-9]{7})/i);
+                    let code = match ? match[1] : decodedText.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+                    
+                    if (code.length >= 7) {
+                        document.getElementById('input-join-code').value = code.substring(0, 7);
+                        document.getElementById('btn-join-room').click(); // Auto join
+                    } else {
+                        showToast("Invalid Node QR Code.", true);
+                    }
+                } else {
+                    // Chat mode barcode security limit
+                    const safeText = decodedText.substring(0, 2000); 
+                    sendEncryptedMessage({ type: 'text', data: `[BARCODE]: ${safeText}` });
+                }
+            }, (error) => {}).catch(err => {
+                closeScanner();
+                showToast("Camera permission denied.", true);
+            });
+        }
+
+        document.getElementById('btn-home-scan').addEventListener('click', () => openScanner('join'));
+        document.getElementById('btn-camera').addEventListener('click', () => openScanner('chat'));
+        
+        function closeScanner() {
             if(html5QrcodeScanner) {
                 html5QrcodeScanner.stop().then(() => {
-                    document.getElementById('scanner-container').classList.add('hidden');
-                });
-            }
-        });
+                    html5QrcodeScanner = null;
+                    switchView(scannerMode === 'join' ? 'view-home' : 'view-chat');
+                }).catch(() => { switchView(scannerMode === 'join' ? 'view-home' : 'view-chat'); });
+            } else { switchView(scannerMode === 'join' ? 'view-home' : 'view-chat'); }
+        }
+        document.getElementById('btn-close-scanner').addEventListener('click', closeScanner);
 
         // Typing Indicator Logic
         let typingTimer;
-        document.getElementById('input-chat').addEventListener('input', () => {
+        document.getElementById('input-chat').addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+
             if(!AppState.mqtt) return;
             AppState.mqtt.publish(`qsys/${AppState.sessionId}`, JSON.stringify({type: 'typing', senderId: AppState.clientId, status: 'start'}), {qos:0});
             clearTimeout(typingTimer);
@@ -556,19 +665,18 @@
            6. INITIALIZATION & EVENTS
            ========================================= */
         document.addEventListener('DOMContentLoaded', async () => {
-            // Restore Session
             if (AppState.sessionId && AppState.role) {
-                cryptoKey = await deriveKey(AppState.sessionId); // Re-derive key
+                cryptoKey = await deriveKey(AppState.sessionId);
                 let bIndex = ['H', 'E', 'M'].indexOf(AppState.sessionId.charAt(0));
                 
                 if (AppState.role === 'host') {
                     document.getElementById('display-session-code').innerText = AppState.sessionId;
                     generateQR(AppState.sessionId);
-                    if (AppState.isChatActive) { switchView('view-chat'); loadChatHistory(); } 
+                    if (AppState.isChatActive) { updateChatHeader(); switchView('view-chat'); loadChatHistory(); } 
                     else { switchView('view-waiting'); }
                 } else {
                     document.getElementById('input-join-code').value = AppState.sessionId;
-                    if (AppState.isChatActive) { switchView('view-chat'); loadChatHistory(); } 
+                    if (AppState.isChatActive) { updateChatHeader(); switchView('view-chat'); loadChatHistory(); } 
                     else { switchView('view-home'); }
                 }
 
@@ -578,14 +686,15 @@
                         if (AppState.isChatActive) {
                             AppState.mqtt.subscribe(`qchat/${AppState.sessionId}`, { qos: 0 });
                         } else if (AppState.role === 'guest') {
-                            AppState.mqtt.publish(`qsys/${AppState.sessionId}`, JSON.stringify({ type: 'join_request', senderId: AppState.clientId }), { qos: 0 });
+                            AppState.mqtt.publish(`qsys/${AppState.sessionId}`, JSON.stringify({ type: 'join_request', senderId: AppState.clientId, senderName: AppState.myName }), { qos: 0 });
                         }
                     } else resetApp();
                 }, bIndex === -1 ? 0 : bIndex);
             } else {
                 const sessionFromUrl = new URLSearchParams(window.location.search).get('session');
                 if (sessionFromUrl) {
-                    document.getElementById('input-join-code').value = sessionFromUrl;
+                    // Clean injected session code
+                    document.getElementById('input-join-code').value = sessionFromUrl.replace(/[^a-zA-Z0-9]/g, '').substring(0, 7);
                     setTimeout(() => document.getElementById('btn-join-room').click(), 500); 
                 }
             }
@@ -594,20 +703,21 @@
             const btnCreate = document.getElementById('btn-create-room');
             btnCreate.addEventListener('click', () => {
                 const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-                let code = 'H'; // Always HiveMQ for primary creation
+                let code = 'H'; 
                 for (let i = 0; i < 6; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
                 
-                btnCreate.innerHTML = '<span class="animate-pulse">Securing Room...</span>';
+                const oldContent = btnCreate.innerHTML;
+                btnCreate.innerHTML = '<span class="animate-pulse">Securing Node...</span>';
                 btnCreate.disabled = true;
 
                 connectMQTT(async (success, errorMsg) => {
-                    btnCreate.innerHTML = '<span>Create Secure Room</span>';
+                    btnCreate.innerHTML = oldContent;
                     btnCreate.disabled = false;
                     if (!success) return showToast(errorMsg, true);
 
                     AppState.role = 'host';
                     AppState.sessionId = code;
-                    cryptoKey = await deriveKey(code); // Generate Crypto Key
+                    cryptoKey = await deriveKey(code); 
                     
                     AppState.isChatActive = false;
                     AppState.chatHistory = [];
@@ -624,7 +734,8 @@
             // Join Room
             const btnJoin = document.getElementById('btn-join-room');
             btnJoin.addEventListener('click', () => {
-                const code = document.getElementById('input-join-code').value.trim().toUpperCase();
+                // Security limit
+                const code = document.getElementById('input-join-code').value.replace(/[^a-zA-Z0-9]/g, '').substring(0, 7).toUpperCase();
                 if (code.length !== 7) return showToast("Enter 7-character code.", true);
                 let bIndex = ['H', 'E', 'M'].indexOf(code.charAt(0));
                 
@@ -632,13 +743,13 @@
                 btnJoin.disabled = true;
                 
                 connectMQTT(async (success, errorMsg) => {
-                    btnJoin.innerText = "Join Securely";
+                    btnJoin.innerText = "Connect Device";
                     btnJoin.disabled = false;
                     if (!success) return showToast(errorMsg, true);
 
                     AppState.role = 'guest';
                     AppState.sessionId = code;
-                    cryptoKey = await deriveKey(code); // Generate Crypto Key
+                    cryptoKey = await deriveKey(code); 
 
                     AppState.isChatActive = false;
                     AppState.chatHistory = [];
@@ -646,9 +757,9 @@
 
                     AppState.mqtt.subscribe(`qsys/${AppState.sessionId}`, { qos: 0 }, (err) => {
                         if(!err) {
-                            AppState.mqtt.publish(`qsys/${AppState.sessionId}`, JSON.stringify({ type: 'join_request', senderId: AppState.clientId }), { qos: 0 });
-                            showToast("Request sent securely...");
-                        } else showToast("Cannot reach room.", true);
+                            AppState.mqtt.publish(`qsys/${AppState.sessionId}`, JSON.stringify({ type: 'join_request', senderId: AppState.clientId, senderName: AppState.myName }), { qos: 0 });
+                            showToast("Identity sent, waiting for host...");
+                        } else showToast("Cannot reach node.", true);
                     });
                 }, bIndex === -1 ? 0 : bIndex);
             });
@@ -660,19 +771,25 @@
             });
 
             // Chat Submit
-            document.getElementById('form-chat').addEventListener('submit', (e) => {
-                e.preventDefault();
+            document.getElementById('btn-send-msg').addEventListener('click', () => {
                 const input = document.getElementById('input-chat');
-                const text = input.value.trim();
+                const text = input.value.trim().substring(0, 2000); // 2000 chars limit
                 if (text) {
                     sendEncryptedMessage({ type: 'text', data: text });
                     input.value = '';
+                    input.style.height = 'auto'; // reset height
+                }
+            });
+            document.getElementById('input-chat').addEventListener('keydown', function(e) {
+                if(e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    document.getElementById('btn-send-msg').click();
                 }
             });
 
             // Modal Approvals
             document.getElementById('btn-approve').addEventListener('click', () => {
-                AppState.mqtt.publish(`qsys/${AppState.sessionId}`, JSON.stringify({ type: 'join_response', senderId: AppState.clientId, targetId: AppState.guestWaitingId, status: 'accepted' }), { qos: 0 });
+                AppState.mqtt.publish(`qsys/${AppState.sessionId}`, JSON.stringify({ type: 'join_response', senderId: AppState.clientId, targetId: AppState.guestWaitingId, status: 'accepted', senderName: AppState.myName }), { qos: 0 });
                 closeApprovalModal();
                 playSound('success');
                 startChat();
@@ -687,18 +804,20 @@
             document.getElementById('btn-copy-link').addEventListener('click', () => {
                 const url = `${window.location.href.split('?')[0]}?session=${AppState.sessionId}`;
                 if (navigator.clipboard && window.isSecureContext) {
-                    navigator.clipboard.writeText(url).then(() => showToast("Copied!"));
+                    navigator.clipboard.writeText(url).then(() => showToast("Link Copied!"));
                 } else {
-                    const ta = document.createElement("textarea"); ta.value = url; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); showToast("Copied!");
+                    const ta = document.createElement("textarea"); ta.value = url; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); showToast("Link Copied!");
                 }
             });
         });
 
         function startChat() {
             AppState.isChatActive = true;
+            updateChatHeader();
             saveState(); 
             AppState.mqtt.subscribe(`qchat/${AppState.sessionId}`, { qos: 0 });
             switchView('view-chat');
+            setTimeout(scrollChatToBottom, 100);
         }
 
         function resetApp() {
@@ -706,12 +825,12 @@
                 if(AppState.sessionId) AppState.mqtt.unsubscribe(`qsys/${AppState.sessionId}`);
                 if(AppState.sessionId) AppState.mqtt.unsubscribe(`qchat/${AppState.sessionId}`);
             }
-            AppState.sessionId = null; AppState.role = null; AppState.isChatActive = false; AppState.guestWaitingId = null; AppState.chatHistory = []; cryptoKey = null;
+            AppState.sessionId = null; AppState.role = null; AppState.isChatActive = false; AppState.guestWaitingId = null; AppState.chatHistory = []; cryptoKey = null; AppState.otherName = 'Unknown';
             saveState(); 
             
             document.getElementById('input-join-code').value = '';
-            document.getElementById('btn-join-room').innerText = "Join Securely";
-            if(html5QrcodeScanner) document.getElementById('btn-close-scanner').click();
+            document.getElementById('btn-join-room').innerText = "Connect Device";
+            if(html5QrcodeScanner) closeScanner();
             switchView('view-home');
         }
 
@@ -719,17 +838,12 @@
             document.getElementById('waiting-spinner').classList.add('hidden');
             const area = document.getElementById('area-room-permission');
             area.classList.remove('hidden');
-            setTimeout(() => { area.classList.remove('opacity-0', 'scale-95'); area.classList.add('opacity-100', 'scale-100'); }, 10);
         }
 
         function closeApprovalModal() {
             const area = document.getElementById('area-room-permission');
-            area.classList.remove('opacity-100', 'scale-100');
-            area.classList.add('opacity-0', 'scale-95');
-            setTimeout(() => {
-                area.classList.add('hidden');
-                if (!AppState.isChatActive) document.getElementById('waiting-spinner').classList.remove('hidden');
-            }, 300);
+            area.classList.add('hidden');
+            if (!AppState.isChatActive) document.getElementById('waiting-spinner').classList.remove('hidden');
         }
     </script>
 </body>
