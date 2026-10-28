@@ -191,7 +191,7 @@
             guestWaitingId: null
         };
 
-        // GÜNCELLENDİ: Hata Yönetimli MQTT Bağlantı Fonksiyonu
+        // GÜNCELLENDİ: Hata Yönetimli ve Çoklu Sunucu (Fallback) Destekli MQTT Bağlantısı
         function connectMQTT(callback) {
             if (typeof mqtt === 'undefined') {
                 callback(false, "Sistem kütüphaneleri yüklenemedi. Lütfen sayfayı yenileyin.");
@@ -205,47 +205,71 @@
             
             if (AppState.mqttClient) AppState.mqttClient.end();
 
-            const brokerUrl = 'wss://broker.hivemq.com:8443/mqtt';
-            let isResolved = false;
+            // Farklı portlar kullanan dünyaca ünlü açık MQTT sunucuları (Operatör engellerini aşmak için)
+            const brokers = [
+                'wss://broker.emqx.io:8084/mqtt',      // EMQX (Genelde çok stabil - Yeni Varsayılan)
+                'wss://broker.hivemq.com:8443/mqtt',   // HiveMQ (Yedek 1)
+                'wss://test.mosquitto.org:8081/mqtt'   // Mosquitto (Yedek 2)
+            ];
             
-            try {
-                // Zaman aşımı ve otomatik yeniden bağlanma ayarları (Sonsuz döngüyü engeller)
-                AppState.mqttClient = mqtt.connect(brokerUrl, {
-                    connectTimeout: 5000,
-                    reconnectPeriod: 0 
-                });
+            let brokerIndex = 0;
+            let isResolved = false;
 
-                AppState.mqttClient.on('connect', () => {
+            function tryConnect() {
+                if (brokerIndex >= brokers.length) {
                     if (!isResolved) {
                         isResolved = true;
-                        AppState.mqttClient.on('message', handleIncomingMessage);
-                        callback(true);
+                        callback(false, "Hiçbir sunucuya ulaşılamadı. Operatörünüz WebSockets portlarını katı şekilde engelliyor olabilir.");
                     }
-                });
+                    return;
+                }
 
-                AppState.mqttClient.on('error', (err) => {
-                    if (!isResolved) {
-                        isResolved = true;
-                        callback(false, "Bağlantı reddedildi. Ağınız güvenlik portunu engelliyor olabilir.");
-                        AppState.mqttClient.end();
-                    }
-                });
+                const brokerUrl = brokers[brokerIndex];
+                
+                try {
+                    const client = mqtt.connect(brokerUrl, {
+                        connectTimeout: 4000, // Her sunucu için en fazla 4 saniye bekle
+                        reconnectPeriod: 0    // Başarısız olursa tekrar deneme, hemen diğer sunucuya geç
+                    });
 
-                // SESSİZ HATA GİDERİCİ: Mobil ağ portu engellerse bağlantı havada kalır. (Timeout çözümü)
-                setTimeout(() => {
-                    if (!isResolved) {
-                        isResolved = true;
-                        callback(false, "Sunucuya ulaşılamadı (Zaman Aşımı). Güvenli ağ portu engellenmiş olabilir.");
-                        AppState.mqttClient.end();
-                    }
-                }, 6000);
+                    // Zaman aşımı kontrolü (Sunucu cevap vermezse askıda kalmayı önler)
+                    let timeoutTimer = setTimeout(() => {
+                        if (!client.connected) {
+                            client.end();
+                            if(!isResolved) {
+                                brokerIndex++;
+                                tryConnect(); // Bir sonraki sunucuyu dene
+                            }
+                        }
+                    }, 4500);
 
-            } catch (error) {
-                if (!isResolved) {
-                    isResolved = true;
-                    callback(false, "Bağlantı başlatılamadı: " + error.message);
+                    client.on('connect', () => {
+                        clearTimeout(timeoutTimer);
+                        if (!isResolved) {
+                            isResolved = true;
+                            AppState.mqttClient = client;
+                            AppState.mqttClient.on('message', handleIncomingMessage);
+                            callback(true); // Bağlantı başarılı!
+                        }
+                    });
+
+                    client.on('error', (err) => {
+                        clearTimeout(timeoutTimer);
+                        client.end();
+                        if (!client.connected && !isResolved) {
+                            brokerIndex++;
+                            tryConnect(); // Hata verirse bir sonraki sunucuyu dene
+                        }
+                    });
+
+                } catch (error) {
+                    brokerIndex++;
+                    tryConnect(); // Kritik çökme olursa bir sonraki sunucuyu dene
                 }
             }
+
+            // İlk sunucuyu (EMQX) denemeye başla
+            tryConnect();
         }
 
         function handleIncomingMessage(topic, message) {
