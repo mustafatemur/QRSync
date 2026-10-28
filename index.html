@@ -57,7 +57,7 @@
 <body class="bg-gray-50 dark:bg-gray-900 h-[100dvh] w-full flex flex-col overflow-hidden text-gray-800 dark:text-gray-200 transition-colors duration-300">
 
     <!-- Top Settings (Lang & Theme) -->
-    <div class="fixed top-4 end-4 z-50 flex space-x-2 rtl:space-x-reverse">
+    <div class="fixed top-4 end-4 z-[60] flex space-x-2 rtl:space-x-reverse">
         <select id="lang-select" class="bg-gray-200/50 hover:bg-gray-300/50 dark:bg-gray-800/50 dark:hover:bg-gray-700 backdrop-blur-md rounded-full text-gray-700 dark:text-gray-200 transition-all shadow-sm px-3 py-2 outline-none font-bold text-xs cursor-pointer appearance-none text-center">
             <option value="en">EN</option>
             <option value="tr">TR</option>
@@ -162,31 +162,29 @@
     <!-- VIEW 3: CHAT / TERMINAL -->
     <div id="view-chat" class="hidden h-[100dvh] w-full flex-col chat-bg transition-colors duration-300">
         
-        <header class="bg-[#f0f2f5] dark:bg-[#202c33] px-4 py-3 flex justify-between items-center shadow-sm shrink-0 z-10 pt-5">
+        <header class="bg-[#f0f2f5] dark:bg-[#202c33] ps-2 pe-24 py-3 flex items-center shadow-sm shrink-0 z-[50] pt-4">
+            <button id="btn-leave-chat" class="p-2 mr-1 rtl:ml-1 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition" title="Leave Chat">
+                <svg class="w-6 h-6 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+            </button>
             <div class="flex items-center space-x-3 rtl:space-x-reverse">
                 <div class="w-10 h-10 rounded-full bg-teal-500 text-white flex items-center justify-center font-bold text-lg shadow-sm uppercase" id="chat-avatar">?</div>
                 <div class="flex flex-col">
-                    <h3 class="font-bold text-gray-900 dark:text-white leading-tight text-lg" id="chat-title">Unknown User</h3>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 flex items-center" dir="ltr">
+                    <h3 class="font-bold text-gray-900 dark:text-white leading-tight text-base" id="chat-title">Unknown User</h3>
+                    <p class="text-[11px] text-gray-500 dark:text-gray-400 flex items-center" dir="ltr">
                         <svg class="w-3 h-3 me-1 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path></svg>
                         AES-256 E2EE
                     </p>
                 </div>
             </div>
-            
-            <button id="btn-leave-chat" class="flex items-center space-x-1 rtl:space-x-reverse px-3 py-1.5 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 rounded-lg transition">
-                <span class="font-bold text-sm" data-i18n="exit">Exit</span>
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-            </button>
         </header>
 
-        <main id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 relative flex flex-col w-full max-w-4xl mx-auto">
+        <main id="chat-messages" class="flex-1 overflow-y-auto p-3 space-y-2 relative flex flex-col w-full max-w-4xl mx-auto">
             <div class="text-center w-full my-2">
                 <span class="bg-[#ffeecd] dark:bg-[#182229] text-gray-700 dark:text-[#ffd279] text-xs px-3 py-1.5 rounded-lg shadow-sm inline-block max-w-xs leading-relaxed text-center" data-i18n="e2eMsg">
                     🔒 Messages are end-to-end encrypted. No one outside of this chat can read or listen to them.
                 </span>
             </div>
-            <div id="typing-indicator" class="hidden self-start bg-white dark:bg-[#202c33] text-gray-500 dark:text-gray-400 text-xs px-4 py-2 rounded-2xl rounded-ts-sm shadow-sm items-center space-x-1 rtl:space-x-reverse w-max mt-2">
+            <div id="typing-indicator" class="hidden self-start bg-white dark:bg-[#202c33] text-gray-500 dark:text-gray-400 text-xs px-3 py-2 rounded-2xl rounded-ts-sm shadow-sm items-center space-x-1 rtl:space-x-reverse w-max mt-2">
                 <span id="typing-name" class="font-medium">User</span>
                 <span data-i18n="isTyping">is typing</span>
                 <span class="w-1 h-1 bg-gray-400 rounded-full animate-bounce mx-0.5"></span>
@@ -198,14 +196,16 @@
         <footer class="bg-[#f0f2f5] dark:bg-[#202c33] p-2 shrink-0">
             <div class="max-w-4xl mx-auto flex items-end space-x-2 rtl:space-x-reverse">
                 <input type="file" id="file-input" accept="image/jpeg, image/png, image/webp" class="hidden">
-                <button type="button" id="btn-attach" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 p-3 transition shrink-0">
+                <button type="button" id="btn-attach" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 p-2.5 transition shrink-0">
                     <svg class="w-6 h-6 transform rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
                 </button>
-                <form id="form-chat" class="flex-1 flex items-end bg-white dark:bg-[#2a3942] rounded-2xl shadow-sm border border-transparent focus-within:border-teal-500 overflow-hidden">
-                    <textarea id="input-chat" rows="1" maxlength="2000" class="flex-1 max-h-32 px-4 py-3 bg-transparent text-gray-900 dark:text-white outline-none resize-none" data-i18n-placeholder="typeMsg" placeholder="Type a message..."></textarea>
+                <form id="form-chat" class="flex-1 flex items-end bg-white dark:bg-[#2a3942] rounded-xl shadow-sm border border-transparent focus-within:border-teal-500 overflow-hidden">
+                    <textarea id="input-chat" rows="1" maxlength="2000" class="flex-1 max-h-32 px-4 py-3 bg-transparent text-gray-900 dark:text-white outline-none resize-none text-[15px]" data-i18n-placeholder="typeMsg" placeholder="Type a message..."></textarea>
                 </form>
                 <button type="submit" id="btn-send-msg" class="bg-teal-500 hover:bg-teal-600 text-white rounded-full h-11 w-11 flex-shrink-0 flex items-center justify-center shadow-md transition transform active:scale-95 mb-0.5">
-                    <svg class="w-5 h-5 rtl:rotate-180" fill="currentColor" viewBox="0 0 20 20"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path></svg>
+                    <svg class="w-5 h-5 rtl:-scale-x-100 ml-0.5 rtl:ml-0 rtl:mr-0.5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M2,21L23,12L2,3V10L17,12L2,14V21Z" />
+                    </svg>
                 </button>
             </div>
         </footer>
@@ -271,7 +271,6 @@
                 if (i18n[lang][key]) el.placeholder = i18n[lang][key];
             });
             
-            // Dynamic texts refresh
             if (AppState.otherName && document.getElementById('permission-name')) {
                 document.getElementById('permission-name').innerText = `${AppState.otherName} ${i18n[lang].wantsToConnect}`;
             }
@@ -387,7 +386,6 @@
 
         function getSafeName() {
             let n = document.getElementById('input-my-name').value.trim();
-            // XSS Filter
             n = n.replace(/</g, "").replace(/>/g, "").substring(0, 20);
             return n || "User-" + Math.floor(Math.random() * 1000);
         }
@@ -510,17 +508,30 @@
         function renderMessage(payload, senderType, senderName, shouldSave = true) {
             const container = document.getElementById('chat-messages');
             const wrapper = document.createElement('div');
-            wrapper.className = `flex w-full ${senderType === 'me' ? 'justify-end' : 'justify-start'} z-10 relative mb-2`;
+            wrapper.className = `flex w-full ${senderType === 'me' ? 'justify-end' : 'justify-start'} z-10 relative mb-1.5`;
             
             const msgDiv = document.createElement('div');
-            msgDiv.className = `max-w-[80%] px-3 py-2 rounded-xl text-[15px] shadow-sm break-words relative flex flex-col ${senderType === 'me' ? 'chat-bubble-me' : 'chat-bubble-other'}`;
+            // COMPACT BUBBLE
+            msgDiv.className = `min-w-[100px] max-w-[85%] px-2.5 py-1.5 rounded-lg text-[14.5px] shadow-sm break-words relative flex flex-col leading-snug ${senderType === 'me' ? 'chat-bubble-me' : 'chat-bubble-other'}`;
             
-            // Name Header inside bubble
-            const nameSpan = document.createElement('span');
-            nameSpan.className = `text-[11px] font-bold mb-1 opacity-80 ${senderType === 'me' ? 'text-teal-700 dark:text-teal-300' : 'text-blue-600 dark:text-blue-400'}`;
-            nameSpan.textContent = senderName || (senderType === 'me' ? AppState.myName : AppState.otherName);
-            msgDiv.appendChild(nameSpan);
+            // Name and Time Header (Side-by-side)
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'flex justify-between items-baseline mb-0.5 space-x-3 rtl:space-x-reverse';
 
+            const nameSpan = document.createElement('span');
+            nameSpan.className = `text-[11px] font-bold opacity-90 ${senderType === 'me' ? 'text-teal-700 dark:text-teal-300' : 'text-blue-600 dark:text-blue-400'}`;
+            nameSpan.textContent = senderName || (senderType === 'me' ? AppState.myName : AppState.otherName);
+            
+            const timeSpan = document.createElement('span');
+            const now = new Date();
+            timeSpan.textContent = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+            timeSpan.className = `text-[9px] opacity-60 ml-2 rtl:ml-0 rtl:mr-2 whitespace-nowrap`;
+            
+            headerDiv.appendChild(nameSpan);
+            headerDiv.appendChild(timeSpan);
+            msgDiv.appendChild(headerDiv);
+
+            // Message Content
             if (payload.type === 'text') {
                 const textSpan = document.createElement('span');
                 textSpan.textContent = payload.data; // Safe injection
@@ -533,12 +544,6 @@
                 msgDiv.appendChild(img);
             }
             
-            const timeSpan = document.createElement('span');
-            const now = new Date();
-            timeSpan.textContent = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
-            timeSpan.className = `text-[10px] text-end mt-1 opacity-70 ${senderType === 'me' ? 'text-gray-700 dark:text-gray-200' : 'text-gray-500'}`;
-            msgDiv.appendChild(timeSpan);
-
             wrapper.appendChild(msgDiv);
             container.insertBefore(wrapper, document.getElementById('typing-indicator'));
             scrollChatToBottom();
