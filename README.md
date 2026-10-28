@@ -1,45 +1,53 @@
-# QRSync - Real-Time Secure Communication 
+# 🌐 Nexus - Secure P2P Terminal
 
-QRSync is an open-source web application that allows you to instantly establish a real-time connection between devices (especially between a computer without a camera and a smartphone) using a QR code or a 6-digit security code, without requiring any installation or backend server infrastructure.
+Nexus is a military-grade, end-to-end encrypted (E2EE) peer-to-peer web terminal. It allows two devices to establish a highly secure, real-time communication channel without the need for any backend infrastructure, databases, or user registration. 
 
-## Features
+Whether you need to securely transfer barcode data from a mobile scanner to a desktop computer, or establish an untraceable ephemeral chat, Nexus handles it entirely within the browser.
 
-* **Two-Way Communication:** Mutual data and message transmission from both devices once the connection is established.
-* **Easy Pairing:** Instant connection by scanning a QR Code or manual entry via a randomly generated 6-digit session code.
-* **Secure Approval System:** The host is presented with a modern approval screen (Modal) for devices requesting to join the room. Unapproved devices cannot initiate communication.
-* **Device Independent:** Works flawlessly in all scenarios: Phone-to-PC, Phone-to-Phone, or PC-to-PC. The "Copy Link" feature makes sharing incredibly easy when hosting a room from a mobile device.
-* **XSS Protection:** All sent and received messages are stripped of HTML characters, protecting the application against malicious script (XSS) attacks.
-* **100% Client-Side:** No database is used. Data is transmitted instantly and isolated between devices via the HiveMQ public MQTT broker.
+![Nexus Interface Preview](https://via.placeholder.com/800x400.png?text=Nexus+-+Secure+P2P+Terminal)
 
-## Technologies Used
+## ✨ Key Features
 
-* **HTML5 & JavaScript (ES6+)**
-* **Tailwind CSS:** For a modern and responsive user interface design.
-* **QRCode.js:** To generate dynamic QR codes directly in the browser.
-* **MQTT.js:** To enable real-time data transfer (over WebSockets) between devices.
+* **🛡️ AES-256-GCM End-to-End Encryption:** Your messages, images, and barcode data are encrypted on the device using the Web Crypto API. The MQTT broker only routes unbreakable ciphertext.
+* **📷 Built-in Hardware Scanner:** Native HTML5 QR/Barcode scanner integration. Read physical barcodes using your phone's camera and instantly beam them to the connected desktop terminal.
+* **🖼️ Secure Media Transfer:** Send images directly. Images are rendered and compressed securely via the HTML5 `<canvas>` before transmission to prevent memory-exhaustion (DoS) attacks and malicious payloads.
+* **🕵️‍♂️ Zero-Trust Architecture:** Strict Content-Security-Policy (CSP), payload size limits (max 2000 chars), and strict DOM text-injection (XSS immunity).
+* **🔄 Multi-Broker Fallback Network:** Never lose connection. Nexus dynamically routes traffic through multiple public MQTT brokers (HiveMQ, EMQX, Mosquitto) based on network availability and port blocking (bypassing carrier-grade NATs).
+* **📱 Native PWA Experience:** WhatsApp-style fullscreen UI, dark/light mode toggle, typing indicators, and hardware-generated audio feedback (Web Audio API) for notifications.
+* **🧠 Session Recovery:** Accidentally refreshed the page? No problem. `sessionStorage` keeps your encryption keys and chat history alive until you close the tab.
 
-##  How to Use
+## 🚀 How to Use
 
-### 1. Hosting a Room (Host)
-1. Open the application and click the **"Create New Room"** button.
-2. A unique QR Code and a 6-digit Connection Code will appear on your screen.
-3. Wait for the other device to scan the QR code with their camera, or copy the connection link and send it to them.
-4. When a connection request arrives from the guest device, click the **"Approve"** button on the confirmation modal that appears on your screen.
+### Establishing a Node (Host)
+1. Open Nexus on your primary device (e.g., Desktop).
+2. Click **"Create Secure Node"**.
+3. A unique QR code and a 7-character session code will be generated.
+4. Wait for the guest device to scan the QR code or manually enter the code. 
+5. Approve the incoming connection request from the inline permission area.
 
-### 2. Joining a Room (Guest)
-* **Via QR Code:** When you scan the QR code on the host's screen using your camera or a barcode scanner, the system will automatically request permission to connect to the room.
-* **Via Code:** Open the app, enter the 6-digit Connection Code provided by the host into the input box at the bottom of the screen, and click the **"Join Room"** button. Wait for the host's approval.
+### Joining a Node (Guest)
+1. Open Nexus on your secondary device (e.g., Mobile Phone).
+2. Tap the **QR Scan** icon on the home screen and scan the host's QR code.
+3. *Alternatively*, enter the 7-character session code manually and click **"Connect Device"**.
+4. Once the host approves, the E2EE terminal will open.
 
-##  Publishing on GitHub Pages
+## 🛠️ Technical Stack
 
-Since this application consists solely of static frontend files, you can host it for free on GitHub Pages in just a few seconds:
+* **Frontend:** HTML5, JavaScript (ES6+)
+* **Styling:** Tailwind CSS (via CDN)
+* **Cryptography:** Native Web Crypto API (PBKDF2 + AES-256-GCM)
+* **Real-time Protocol:** MQTT over WebSockets (`mqtt.js`)
+* **Hardware Integrations:** `html5-qrcode` (Camera), Web Audio API (Hardware beeps)
 
-1. Create a new repository on your GitHub account or *fork* this repository.
-2. Go to the **Settings** tab of your repository.
-3. Click on **Pages** from the left sidebar menu.
-4. Under the "Build and deployment" section, set the **Branch** to `main` (or `master`) and save.
-5. Within a few minutes, your application will be live at `https://yourusername.github.io/qrsync/`.
+## 🌐 Deployment (GitHub Pages)
 
-##  License
+Nexus is a 100% client-side Single Page Application (SPA) contained within a single `index.html` file. 
 
-This project is licensed under the MIT License. You are free to use, modify, and distribute it as you wish.
+To deploy your own secure instance for free:
+1. Fork this repository.
+2. Go to **Settings > Pages**.
+3. Set the Source to the `main` branch.
+4. Your secure terminal is now live on `https://your-username.github.io/repo-name/`.
+
+---
+*Disclaimer: While Nexus uses AES-256-GCM encryption, it relies on public MQTT brokers for signaling. Do not use for transmitting highly classified government data.*
