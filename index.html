@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="transition-colors duration-300">
+<html lang="en" dir="ltr" class="transition-colors duration-300">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -23,82 +23,90 @@
             font-family: 'Inter', system-ui, sans-serif; 
             -webkit-tap-highlight-color: transparent; 
         }
-        /* Custom scrollbar */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 10px; }
         .dark ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); }
         
-        /* WhatsApp-like Chat Bubbles */
         .chat-bubble-me {
             background-color: #dcf8c6;
             color: #111b21;
-            border-top-right-radius: 4px !important;
         }
-        .dark .chat-bubble-me {
-            background-color: #005c4b;
-            color: #e9edef;
-        }
+        html[dir="ltr"] .chat-bubble-me { border-top-right-radius: 4px !important; }
+        html[dir="rtl"] .chat-bubble-me { border-top-left-radius: 4px !important; }
+        .dark .chat-bubble-me { background-color: #005c4b; color: #e9edef; }
+        
         .chat-bubble-other {
             background-color: #ffffff;
             color: #111b21;
-            border-top-left-radius: 4px !important;
         }
-        .dark .chat-bubble-other {
-            background-color: #202c33;
-            color: #e9edef;
-        }
+        html[dir="ltr"] .chat-bubble-other { border-top-left-radius: 4px !important; }
+        html[dir="rtl"] .chat-bubble-other { border-top-right-radius: 4px !important; }
+        .dark .chat-bubble-other { background-color: #202c33; color: #e9edef; }
 
-        /* Chat Wallpaper Background */
         .chat-bg {
             background-color: #efeae2;
-            background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20.5V18H0v-2h20v-2H0v-2h20v-2H0V8h20V6H0V4h20V2H0V0h22v20h2V0h2v20h2V0h2v20h2V0h2v20h2V0h2v20h2v2H20v-1.5zM0 20h2v20H0V20zm4 0h2v20H4V20zm4 0h2v20H8V20zm4 0h2v20h-2V20zm4 0h2v20h-2V20zm4 4h20v2H20v-2zm0 4h20v2H20v-2zm0 4h20v2H20v-2zm0 4h20v2H20v-2z' fill='%23000000' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20.5V18H0v-2h20v-2H0v-2h20v-2H0V8h20V6H0V4h20V2H0V0h22v20h2V0h2v20h2V0h2v20h2V0h2v20h2v2H20v-1.5zM0 20h2v20H0V20zm4 0h2v20H4V20zm4 0h2v20H8V20zm4 0h2v20h-2V20zm4 0h2v20h-2V20zm4 4h20v2H20v-2zm0 4h20v2H20v-2zm0 4h20v2H20v-2zm0 4h20v2H20v-2z' fill='%23000000' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
         }
         .dark .chat-bg {
             background-color: #0b141a;
-            background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20.5V18H0v-2h20v-2H0v-2h20v-2H0V8h20V6H0V4h20V2H0V0h22v20h2V0h2v20h2V0h2v20h2V0h2v20h2V0h2v20h2v2H20v-1.5zM0 20h2v20H0V20zm4 0h2v20H4V20zm4 0h2v20H8V20zm4 0h2v20h-2V20zm4 0h2v20h-2V20zm4 4h20v2H20v-2zm0 4h20v2H20v-2zm0 4h20v2H20v-2zm0 4h20v2H20v-2z' fill='%23ffffff' fill-opacity='0.02' fill-rule='evenodd'/%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20.5V18H0v-2h20v-2H0v-2h20v-2H0V8h20V6H0V4h20V2H0V0h22v20h2V0h2v20h2V0h2v20h2V0h2v20h2v2H20v-1.5zM0 20h2v20H0V20zm4 0h2v20H4V20zm4 0h2v20H8V20zm4 0h2v20h-2V20zm4 0h2v20h-2V20zm4 4h20v2H20v-2zm0 4h20v2H20v-2zm0 4h20v2H20v-2zm0 4h20v2H20v-2z' fill='%23ffffff' fill-opacity='0.02' fill-rule='evenodd'/%3E%3C/svg%3E");
         }
     </style>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 h-[100dvh] w-full flex flex-col overflow-hidden text-gray-800 dark:text-gray-200 transition-colors duration-300">
 
-    <!-- Theme Toggle -->
-    <div class="fixed top-4 right-4 z-50">
+    <!-- Top Settings (Lang & Theme) -->
+    <div class="fixed top-4 end-4 z-50 flex space-x-2 rtl:space-x-reverse">
+        <select id="lang-select" class="bg-gray-200/50 hover:bg-gray-300/50 dark:bg-gray-800/50 dark:hover:bg-gray-700 backdrop-blur-md rounded-full text-gray-700 dark:text-gray-200 transition-all shadow-sm px-3 py-2 outline-none font-bold text-xs cursor-pointer appearance-none text-center">
+            <option value="en">EN</option>
+            <option value="tr">TR</option>
+            <option value="es">ES</option>
+            <option value="fr">FR</option>
+            <option value="de">DE</option>
+            <option value="ru">RU</option>
+            <option value="ar">AR</option>
+        </select>
+        
         <button id="btn-theme-toggle" class="p-2 bg-gray-200/50 hover:bg-gray-300/50 dark:bg-gray-800/50 dark:hover:bg-gray-700 backdrop-blur-md rounded-full text-gray-700 dark:text-gray-200 transition-all shadow-sm">
-            <svg id="icon-sun" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-            <svg id="icon-moon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+            <svg id="icon-sun" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            <svg id="icon-moon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
         </button>
     </div>
 
-    <!-- VIEW 1: HOME (Native App Layout) -->
+    <!-- VIEW 1: HOME -->
     <div id="view-home" class="flex-1 flex flex-col items-center justify-center p-6 w-full max-w-md mx-auto h-full">
-        <div class="mb-8 text-teal-600 dark:text-teal-400">
+        <div class="mb-4 text-teal-600 dark:text-teal-400">
             <svg class="w-20 h-20 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
         </div>
         <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight">Nexus</h1>
-        <p class="text-gray-500 dark:text-gray-400 text-sm mb-10 text-center">Fast & Secure P2P Communication.</p>
+        <p class="text-gray-500 dark:text-gray-400 text-sm mb-6 text-center" data-i18n="appDesc">Fast & Secure P2P Communication.</p>
         
-        <button id="btn-create-room" class="w-full mb-8 bg-teal-600 hover:bg-teal-700 text-white font-bold py-4 px-4 rounded-xl shadow-lg transform transition active:scale-95 flex justify-center items-center text-lg">
-            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-            <span>Create Secure Node</span>
+        <!-- Name Input Area -->
+        <div class="w-full mb-6">
+            <input type="text" id="input-my-name" data-i18n-placeholder="enterName" placeholder="Your Name" maxlength="20" class="w-full px-4 py-3 text-center text-lg font-bold rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none transition shadow-sm">
+        </div>
+
+        <button id="btn-create-room" class="w-full mb-6 bg-teal-600 hover:bg-teal-700 text-white font-bold py-4 px-4 rounded-xl shadow-lg transform transition active:scale-95 flex justify-center items-center text-lg">
+            <svg class="w-6 h-6 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            <span data-i18n="createNode">Create Secure Node</span>
         </button>
 
-        <div class="w-full relative flex items-center mb-8">
+        <div class="w-full relative flex items-center mb-6">
             <div class="flex-grow border-t border-gray-300 dark:border-gray-700"></div>
-            <span class="flex-shrink-0 mx-4 text-gray-400 dark:text-gray-500 text-xs font-bold tracking-wider">OR JOIN VIA CODE</span>
+            <span class="flex-shrink-0 mx-4 text-gray-400 dark:text-gray-500 text-xs font-bold tracking-wider" data-i18n="orJoin">OR JOIN VIA CODE</span>
             <div class="flex-grow border-t border-gray-300 dark:border-gray-700"></div>
         </div>
 
         <div class="w-full space-y-4">
-            <div class="flex space-x-2 w-full">
-                <!-- New: Scan QR Button on Home Screen -->
+            <div class="flex space-x-2 rtl:space-x-reverse w-full">
                 <button id="btn-home-scan" title="Scan QR Code" class="bg-gray-100 dark:bg-gray-800 text-teal-600 dark:text-teal-400 px-4 rounded-xl shadow-sm border border-gray-300 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700 transition active:scale-95 shrink-0 flex items-center justify-center">
                     <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
                 </button>
-                <input type="text" id="input-join-code" maxlength="7" class="w-full px-4 py-4 text-center text-2xl tracking-[0.3em] font-mono rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none transition uppercase shadow-sm" placeholder="_______">
+                <input type="text" id="input-join-code" maxlength="7" dir="ltr" class="w-full px-4 py-4 text-center text-2xl tracking-[0.3em] font-mono rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none transition uppercase shadow-sm" placeholder="_______">
             </div>
             
-            <button id="btn-join-room" class="w-full bg-white dark:bg-gray-800 border-2 border-teal-500 text-teal-600 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-gray-700 font-bold py-4 px-4 rounded-xl shadow-sm transform transition active:scale-95 text-lg">
+            <button id="btn-join-room" class="w-full bg-white dark:bg-gray-800 border-2 border-teal-500 text-teal-600 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-gray-700 font-bold py-4 px-4 rounded-xl shadow-sm transform transition active:scale-95 text-lg" data-i18n="connectBtn">
                 Connect Device
             </button>
         </div>
@@ -106,120 +114,107 @@
 
     <!-- VIEW 2: HOST WAITING -->
     <div id="view-waiting" class="hidden flex-1 flex-col items-center justify-center p-6 w-full max-w-md mx-auto h-full">
-        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Node Active</h2>
-        <p class="text-gray-500 dark:text-gray-400 text-center mb-8">Scan QR or share the link with the guest device.</p>
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-2" data-i18n="nodeActive">Node Active</h2>
+        <p class="text-gray-500 dark:text-gray-400 text-center mb-8" data-i18n="nodeDesc">Scan QR or share the link with the guest device.</p>
         
         <div class="bg-white p-4 rounded-2xl shadow-md mb-8 w-max mx-auto border border-gray-100 dark:border-gray-800">
             <div id="qrcode" class="bg-white p-2"></div>
         </div>
         
         <div class="text-center w-full mb-8">
-            <span class="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-widest block mb-1">Session Code</span>
-            <span id="display-session-code" class="text-3xl font-mono font-bold text-teal-600 dark:text-teal-400 tracking-[0.2em] block mb-4"></span>
+            <span class="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-widest block mb-1" data-i18n="sessionCode">Session Code</span>
+            <span id="display-session-code" class="text-3xl font-mono font-bold text-teal-600 dark:text-teal-400 tracking-[0.2em] block mb-4" dir="ltr"></span>
             
             <button id="btn-copy-link" class="text-sm bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 py-2 px-6 rounded-full font-bold transition flex items-center justify-center mx-auto active:scale-95">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                Copy Link
+                <svg class="w-4 h-4 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                <span data-i18n="copyLink">Copy Link</span>
             </button>
         </div>
         
         <div id="waiting-spinner" class="flex flex-col items-center justify-center space-y-3 mb-6 w-full">
-            <div class="flex space-x-2">
+            <div class="flex space-x-2 rtl:space-x-reverse">
                 <div class="w-2.5 h-2.5 bg-teal-500 rounded-full animate-bounce"></div>
                 <div class="w-2.5 h-2.5 bg-teal-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
                 <div class="w-2.5 h-2.5 bg-teal-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
             </div>
-            <span class="text-gray-500 dark:text-gray-400 font-medium text-sm">Waiting for incoming connection...</span>
+            <span class="text-gray-500 dark:text-gray-400 font-medium text-sm" data-i18n="waitingConn">Waiting for incoming connection...</span>
         </div>
 
-        <!-- Inline Permission Request -->
         <div id="area-room-permission" class="hidden w-full bg-white dark:bg-gray-800 border border-teal-200 dark:border-gray-700 rounded-2xl p-5 shadow-lg transform transition-all duration-300">
             <div class="flex items-center mb-4">
-                <div class="w-12 h-12 bg-teal-100 dark:bg-teal-900/50 rounded-full flex items-center justify-center text-teal-600 dark:text-teal-400 mr-4">
+                <div class="w-12 h-12 bg-teal-100 dark:bg-teal-900/50 rounded-full flex items-center justify-center text-teal-600 dark:text-teal-400 me-4">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4"></path></svg>
                 </div>
                 <div>
                     <h4 class="font-bold text-gray-900 dark:text-white text-base leading-tight" id="permission-name">Someone wants to connect.</h4>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Identity verification required.</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400" data-i18n="identityReq">Identity verification required.</p>
                 </div>
             </div>
-            <div class="flex space-x-3 w-full">
-                <button id="btn-reject" class="flex-1 py-2.5 px-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-white font-bold rounded-xl transition text-sm">Deny</button>
-                <button id="btn-approve" class="flex-1 py-2.5 px-3 bg-teal-500 hover:bg-teal-600 text-white font-bold rounded-xl shadow-md transition text-sm">Accept</button>
+            <div class="flex space-x-3 rtl:space-x-reverse w-full">
+                <button id="btn-reject" class="flex-1 py-2.5 px-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-white font-bold rounded-xl transition text-sm" data-i18n="deny">Deny</button>
+                <button id="btn-approve" class="flex-1 py-2.5 px-3 bg-teal-500 hover:bg-teal-600 text-white font-bold rounded-xl shadow-md transition text-sm" data-i18n="accept">Accept</button>
             </div>
         </div>
 
-        <button id="btn-cancel-waiting" class="mt-8 text-sm text-red-500 dark:text-red-400 hover:underline transition font-bold">End Session</button>
+        <button id="btn-cancel-waiting" class="mt-8 text-sm text-red-500 dark:text-red-400 hover:underline transition font-bold" data-i18n="endSession">End Session</button>
     </div>
 
-    <!-- VIEW 3: CHAT / TERMINAL (WhatsApp Style Fullscreen) -->
+    <!-- VIEW 3: CHAT / TERMINAL -->
     <div id="view-chat" class="hidden h-[100dvh] w-full flex-col chat-bg transition-colors duration-300">
         
-        <!-- Header -->
-        <header class="bg-[#f0f2f5] dark:bg-[#202c33] px-4 py-3 flex justify-between items-center shadow-sm shrink-0 z-10">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-full bg-teal-500 text-white flex items-center justify-center font-bold text-lg shadow-sm" id="chat-avatar">
-                    ?
-                </div>
+        <header class="bg-[#f0f2f5] dark:bg-[#202c33] px-4 py-3 flex justify-between items-center shadow-sm shrink-0 z-10 pt-5">
+            <div class="flex items-center space-x-3 rtl:space-x-reverse">
+                <div class="w-10 h-10 rounded-full bg-teal-500 text-white flex items-center justify-center font-bold text-lg shadow-sm uppercase" id="chat-avatar">?</div>
                 <div class="flex flex-col">
                     <h3 class="font-bold text-gray-900 dark:text-white leading-tight text-lg" id="chat-title">Unknown User</h3>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 flex items-center">
-                        <svg class="w-3 h-3 mr-1 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path></svg>
-                        E2EE Active
+                    <p class="text-xs text-gray-500 dark:text-gray-400 flex items-center" dir="ltr">
+                        <svg class="w-3 h-3 me-1 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path></svg>
+                        AES-256 E2EE
                     </p>
                 </div>
             </div>
-            <button id="btn-leave-chat" class="text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 p-2 rounded-full transition" title="Disconnect">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+            
+            <button id="btn-leave-chat" class="flex items-center space-x-1 rtl:space-x-reverse px-3 py-1.5 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 rounded-lg transition">
+                <span class="font-bold text-sm" data-i18n="exit">Exit</span>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
             </button>
         </header>
 
-        <!-- Messages Area -->
         <main id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 relative flex flex-col w-full max-w-4xl mx-auto">
             <div class="text-center w-full my-2">
-                <span class="bg-[#ffeecd] dark:bg-[#182229] text-gray-700 dark:text-[#ffd279] text-xs px-3 py-1.5 rounded-lg shadow-sm inline-block max-w-xs leading-relaxed text-center">
+                <span class="bg-[#ffeecd] dark:bg-[#182229] text-gray-700 dark:text-[#ffd279] text-xs px-3 py-1.5 rounded-lg shadow-sm inline-block max-w-xs leading-relaxed text-center" data-i18n="e2eMsg">
                     🔒 Messages are end-to-end encrypted. No one outside of this chat can read or listen to them.
                 </span>
             </div>
-            <!-- Typing Indicator (Absolute to bottom left) -->
-            <div id="typing-indicator" class="hidden self-start bg-white dark:bg-[#202c33] text-gray-500 dark:text-gray-400 text-xs px-4 py-2 rounded-2xl rounded-tl-sm shadow-sm flex items-center space-x-1 w-max">
-                <span id="typing-name" class="font-medium mr-1">User</span>
-                <span>is typing</span>
+            <div id="typing-indicator" class="hidden self-start bg-white dark:bg-[#202c33] text-gray-500 dark:text-gray-400 text-xs px-4 py-2 rounded-2xl rounded-ts-sm shadow-sm items-center space-x-1 rtl:space-x-reverse w-max mt-2">
+                <span id="typing-name" class="font-medium">User</span>
+                <span data-i18n="isTyping">is typing</span>
                 <span class="w-1 h-1 bg-gray-400 rounded-full animate-bounce mx-0.5"></span>
                 <span class="w-1 h-1 bg-gray-400 rounded-full animate-bounce mx-0.5" style="animation-delay: 0.2s"></span>
                 <span class="w-1 h-1 bg-gray-400 rounded-full animate-bounce mx-0.5" style="animation-delay: 0.4s"></span>
             </div>
         </main>
 
-        <!-- Input Footer -->
         <footer class="bg-[#f0f2f5] dark:bg-[#202c33] p-2 shrink-0">
-            <div class="max-w-4xl mx-auto flex items-end space-x-2">
-                <!-- Hidden File Input -->
+            <div class="max-w-4xl mx-auto flex items-end space-x-2 rtl:space-x-reverse">
                 <input type="file" id="file-input" accept="image/jpeg, image/png, image/webp" class="hidden">
-                
                 <button type="button" id="btn-attach" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 p-3 transition shrink-0">
                     <svg class="w-6 h-6 transform rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
                 </button>
-                
-                <button type="button" id="btn-camera" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 p-3 transition shrink-0">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                </button>
-
                 <form id="form-chat" class="flex-1 flex items-end bg-white dark:bg-[#2a3942] rounded-2xl shadow-sm border border-transparent focus-within:border-teal-500 overflow-hidden">
-                    <textarea id="input-chat" rows="1" maxlength="2000" class="flex-1 max-h-32 px-4 py-3 bg-transparent text-gray-900 dark:text-white outline-none resize-none" placeholder="Type a message..."></textarea>
+                    <textarea id="input-chat" rows="1" maxlength="2000" class="flex-1 max-h-32 px-4 py-3 bg-transparent text-gray-900 dark:text-white outline-none resize-none" data-i18n-placeholder="typeMsg" placeholder="Type a message..."></textarea>
                 </form>
-                
-                <button type="submit" id="btn-send-msg" class="bg-teal-500 hover:bg-teal-600 text-white rounded-full p-3.5 shadow-md transition transform active:scale-95 shrink-0 flex items-center justify-center h-12 w-12">
-                    <svg class="w-5 h-5 ml-1" fill="currentColor" viewBox="0 0 20 20"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path></svg>
+                <button type="submit" id="btn-send-msg" class="bg-teal-500 hover:bg-teal-600 text-white rounded-full h-11 w-11 flex-shrink-0 flex items-center justify-center shadow-md transition transform active:scale-95 mb-0.5">
+                    <svg class="w-5 h-5 rtl:rotate-180" fill="currentColor" viewBox="0 0 20 20"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path></svg>
                 </button>
             </div>
         </footer>
     </div>
 
-    <!-- VIEW 4: FULLSCREEN SCANNER OVERLAY -->
+    <!-- SCANNER OVERLAY -->
     <div id="view-scanner" class="hidden fixed inset-0 z-[100] bg-black flex-col">
         <div class="h-16 flex items-center justify-between px-4 bg-gray-900 text-white shrink-0 shadow-lg">
-            <span id="scanner-title" class="font-bold text-lg">Scan Barcode / QR</span>
+            <span id="scanner-title" class="font-bold text-lg" data-i18n="scanToJoin">Scan QR to Join</span>
             <button id="btn-close-scanner" class="p-2 hover:bg-gray-800 rounded-full transition">
                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
@@ -232,24 +227,59 @@
         </div>
     </div>
 
-    <!-- NOTIFICATION TOAST -->
-    <div id="toast" class="fixed top-4 left-1/2 transform -translate-x-1/2 bg-gray-800 dark:bg-gray-700 text-white px-6 py-3 rounded-full shadow-2xl -translate-y-20 opacity-0 transition-all duration-300 z-[200] flex items-center pointer-events-none text-sm font-bold">
-        <span id="toast-msg">Notification</span>
+    <!-- IMAGE MODAL -->
+    <div id="image-modal" class="hidden fixed inset-0 z-[200] bg-black/95 flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <button id="btn-close-image" class="absolute top-4 end-4 text-white p-2 bg-gray-800 hover:bg-gray-700 rounded-full transition z-10">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+        <img id="modal-image-src" src="" class="max-w-full max-h-full object-contain rounded-lg shadow-2xl transition-transform duration-300 scale-95">
+    </div>
+
+    <!-- TOAST -->
+    <div id="toast" class="fixed top-4 start-1/2 transform -translate-x-1/2 rtl:translate-x-1/2 bg-gray-800 dark:bg-gray-700 text-white px-6 py-3 rounded-full shadow-2xl -translate-y-20 opacity-0 transition-all duration-300 z-[200] flex items-center pointer-events-none text-sm font-bold">
+        <span id="toast-msg"></span>
     </div>
 
     <script>
         /* =========================================
-           0. INVENTOR NAMES (Identity Assignment)
+           0. TRANSLATION SYSTEM (i18n)
            ========================================= */
-        const INVENTORS = [
-            "Nikola Tesla", "Marie Curie", "Thomas Edison", "Ada Lovelace", 
-            "Alan Turing", "Albert Einstein", "Alexander Bell", "Galileo Galilei", 
-            "Isaac Newton", "Grace Hopper", "Hedy Lamarr", "Johannes Gutenberg"
-        ];
+        const i18n = {
+            en: { appDesc: "Fast & Secure P2P Communication.", createNode: "Create Secure Node", orJoin: "OR JOIN VIA CODE", connectBtn: "Connect Device", nodeActive: "Node Active", nodeDesc: "Scan QR or share the link with the guest device.", sessionCode: "Session Code", copyLink: "Copy Link", waitingConn: "Waiting for incoming connection...", wantsToConnect: "wants to connect.", identityReq: "Identity verification required.", deny: "Deny", accept: "Accept", endSession: "End Session", exit: "Exit", e2eMsg: "🔒 Messages are end-to-end encrypted. No one outside of this chat can read or listen to them.", isTyping: "is typing", typeMsg: "Type a message...", scanToJoin: "Scan QR to Join", enterName: "Your Name", unknownUser: "Unknown User", copied: "Link Copied!", invalidCode: "Enter 7-character code.", connecting: "Connecting...", waitingHost: "Identity sent, waiting for host...", unreachable: "Cannot reach node.", disconnected: "disconnected.", rejected: "Connection Rejected." },
+            tr: { appDesc: "Hızlı & Güvenli P2P İletişim.", createNode: "Güvenli Oda Kur", orJoin: "VEYA KOD İLE KATIL", connectBtn: "Cihaza Bağlan", nodeActive: "Oda Aktif", nodeDesc: "QR kodu okutun veya misafir cihazla linki paylaşın.", sessionCode: "Bağlantı Kodu", copyLink: "Linki Kopyala", waitingConn: "Gelen bağlantı bekleniyor...", wantsToConnect: "bağlanmak istiyor.", identityReq: "Kimlik doğrulaması gerekiyor.", deny: "Reddet", accept: "Kabul Et", endSession: "Oturumu Sonlandır", exit: "Çıkış", e2eMsg: "🔒 Mesajlar uçtan uca şifrelidir. Bu sohbetin dışındaki hiç kimse onları okuyamaz veya dinleyemez.", isTyping: "yazıyor", typeMsg: "Bir mesaj yazın...", scanToJoin: "Katılmak İçin Okut", enterName: "İsminiz", unknownUser: "Bilinmeyen Kullanıcı", copied: "Link Kopyalandı!", invalidCode: "7 haneli kodu girin.", connecting: "Bağlanılıyor...", waitingHost: "İstek gönderildi, onay bekleniyor...", unreachable: "Sunucuya ulaşılamadı.", disconnected: "ayrıldı.", rejected: "Bağlantı Reddedildi." },
+            es: { appDesc: "Comunicación P2P rápida y segura.", createNode: "Crear Nodo Seguro", orJoin: "O ÚNETE VÍA CÓDIGO", connectBtn: "Conectar Dispositivo", nodeActive: "Nodo Activo", nodeDesc: "Escanea el QR o comparte el enlace con el dispositivo invitado.", sessionCode: "Código de Sesión", copyLink: "Copiar Enlace", waitingConn: "Esperando conexión entrante...", wantsToConnect: "quiere conectarse.", identityReq: "Se requiere verificación de identidad.", deny: "Rechazar", accept: "Aceptar", endSession: "Finalizar Sesión", exit: "Salir", e2eMsg: "🔒 Los mensajes están cifrados de extremo a extremo. Nadie fuera de este chat puede leerlos o escucharlos.", isTyping: "está escribiendo", typeMsg: "Escribe un mensaje...", scanToJoin: "Escanear para unirse", enterName: "Tu Nombre", unknownUser: "Usuario Desconocido", copied: "¡Enlace Copiado!", invalidCode: "Ingrese un código de 7 caracteres.", connecting: "Conectando...", waitingHost: "Identidad enviada, esperando al anfitrión...", unreachable: "No se puede llegar al nodo.", disconnected: "desconectado.", rejected: "Conexión Rechazada." },
+            fr: { appDesc: "Communication P2P rapide et sécurisée.", createNode: "Créer un nœud sécurisé", orJoin: "OU REJOINDRE PAR CODE", connectBtn: "Connecter l'appareil", nodeActive: "Nœud actif", nodeDesc: "Scannez le QR ou partagez le lien avec l'appareil invité.", sessionCode: "Code de session", copyLink: "Copier le lien", waitingConn: "En attente de connexion entrante...", wantsToConnect: "veut se connecter.", identityReq: "Vérification d'identité requise.", deny: "Refuser", accept: "Accepter", endSession: "Terminer la session", exit: "Quitter", e2eMsg: "🔒 Les messages sont chiffrés de bout en bout. Personne en dehors de cette discussion ne peut les lire ou les écouter.", isTyping: "écrit", typeMsg: "Tapez un message...", scanToJoin: "Scanner pour rejoindre", enterName: "Votre Nom", unknownUser: "Utilisateur Inconnu", copied: "Lien copié !", invalidCode: "Entrez un code à 7 caractères.", connecting: "Connexion...", waitingHost: "Identité envoyée, en attente de l'hôte...", unreachable: "Impossible d'atteindre le nœud.", disconnected: "déconnecté.", rejected: "Connexion Rejetée." },
+            de: { appDesc: "Schnelle & sichere P2P-Kommunikation.", createNode: "Sicheren Knoten erstellen", orJoin: "ODER PER CODE BEITRETEN", connectBtn: "Gerät verbinden", nodeActive: "Knoten aktiv", nodeDesc: "QR scannen oder Link mit dem Gastgerät teilen.", sessionCode: "Sitzungscode", copyLink: "Link kopieren", waitingConn: "Warten auf eingehende Verbindung...", wantsToConnect: "möchte sich verbinden.", identityReq: "Identitätsprüfung erforderlich.", deny: "Ablehnen", accept: "Akzeptieren", endSession: "Sitzung beenden", exit: "Verlassen", e2eMsg: "🔒 Nachrichten sind Ende-zu-Ende-verschlüsselt. Niemand außerhalb dieses Chats kann sie lesen oder abhören.", isTyping: "schreibt", typeMsg: "Schreibe eine Nachricht...", scanToJoin: "Zum Beitreten scannen", enterName: "Dein Name", unknownUser: "Unbekannter Benutzer", copied: "Link kopiert!", invalidCode: "Geben Sie einen 7-stelligen Code ein.", connecting: "Verbinde...", waitingHost: "Identität gesendet, warte auf Host...", unreachable: "Knoten nicht erreichbar.", disconnected: "getrennt.", rejected: "Verbindung abgelehnt." },
+            ar: { appDesc: "اتصال P2P سريع وآمن.", createNode: "إنشاء عقدة آمنة", orJoin: "أو الانضمام عبر الرمز", connectBtn: "توصيل الجهاز", nodeActive: "العقدة نشطة", nodeDesc: "امسح رمز الاستجابة السريعة أو شارك الرابط مع الجهاز الضيف.", sessionCode: "رمز الجلسة", copyLink: "نسخ الرابط", waitingConn: "في انتظار الاتصال الوارد...", wantsToConnect: "يريد الاتصال.", identityReq: "مطلوب التحقق من الهوية.", deny: "رفض", accept: "قبول", endSession: "إنهاء الجلسة", exit: "خروج", e2eMsg: "🔒 الرسائل مشفرة من البداية إلى النهاية. لا يمكن لأحد خارج هذه المحادثة قراءتها أو الاستماع إليها.", isTyping: "يكتب", typeMsg: "اكتب رسالة...", scanToJoin: "امسح للانضمام", enterName: "اسمك", unknownUser: "مستخدم غير معروف", copied: "تم نسخ الرابط!", invalidCode: "أدخل الرمز المكون من 7 أحرف.", connecting: "جارٍ الاتصال...", waitingHost: "تم إرسال الهوية، في انتظار المضيف...", unreachable: "لا يمكن الوصول إلى العقدة.", disconnected: "غادر.", rejected: "تم رفض الاتصال." },
+            ru: { appDesc: "Быстрая и безопасная P2P связь.", createNode: "Создать безопасный узел", orJoin: "ИЛИ ПРИСОЕДИНИТЕСЬ ПО КОДУ", connectBtn: "Подключить устройство", nodeActive: "Узел активен", nodeDesc: "Отсканируйте QR или поделитесь ссылкой с гостевым устройством.", sessionCode: "Код сеанса", copyLink: "Копировать ссылку", waitingConn: "Ожидание входящего подключения...", wantsToConnect: "хочет подключиться.", identityReq: "Требуется проверка личности.", deny: "Отклонить", accept: "Принять", endSession: "Завершить сеанс", exit: "Выход", e2eMsg: "🔒 Сообщения защищены сквозным шифрованием. Никто за пределами этого чата не сможет их прочитать.", isTyping: "печатает", typeMsg: "Введите сообщение...", scanToJoin: "Сканировать для входа", enterName: "Ваше имя", unknownUser: "Неизвестный пользователь", copied: "Ссылка скопирована!", invalidCode: "Введите 7-значный код.", connecting: "Подключение...", waitingHost: "Запрос отправлен, ожидание...", unreachable: "Узел недоступен.", disconnected: "отключился.", rejected: "В соединении отказано." }
+        };
+        let currentLang = localStorage.getItem('nexus_lang') || 'en';
 
-        function getRandomInventor() {
-            return INVENTORS[Math.floor(Math.random() * INVENTORS.length)];
+        function applyLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('nexus_lang', lang);
+            document.documentElement.lang = lang;
+            document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
+            document.getElementById('lang-select').value = lang;
+
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (i18n[lang][key]) el.innerText = i18n[lang][key];
+            });
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (i18n[lang][key]) el.placeholder = i18n[lang][key];
+            });
+            
+            // Dynamic texts refresh
+            if (AppState.otherName && document.getElementById('permission-name')) {
+                document.getElementById('permission-name').innerText = `${AppState.otherName} ${i18n[lang].wantsToConnect}`;
+            }
+            if (AppState.otherName && document.getElementById('typing-name')) {
+                document.getElementById('typing-name').nextElementSibling.innerText = i18n[lang].isTyping;
+            }
         }
+        document.getElementById('lang-select').addEventListener('change', (e) => applyLanguage(e.target.value));
 
         /* =========================================
            1. CRYPTOGRAPHY (AES-256 E2EE)
@@ -258,9 +288,7 @@
 
         async function deriveKey(sessionCode) {
             const enc = new TextEncoder();
-            const keyMaterial = await window.crypto.subtle.importKey(
-                "raw", enc.encode(sessionCode), {name: "PBKDF2"}, false, ["deriveBits", "deriveKey"]
-            );
+            const keyMaterial = await window.crypto.subtle.importKey("raw", enc.encode(sessionCode), {name: "PBKDF2"}, false, ["deriveBits", "deriveKey"]);
             return window.crypto.subtle.deriveKey(
                 { name: "PBKDF2", salt: enc.encode("nexus_secure_salt_v1"), iterations: 100000, hash: "SHA-256" },
                 keyMaterial, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]
@@ -274,15 +302,10 @@
                 const enc = new TextEncoder();
                 const ciphertext = await window.crypto.subtle.encrypt({name: "AES-GCM", iv: iv}, cryptoKey, enc.encode(text));
                 const payload = new Uint8Array(iv.byteLength + ciphertext.byteLength);
-                payload.set(iv, 0);
-                payload.set(new Uint8Array(ciphertext), iv.byteLength);
-                let binary = '';
-                payload.forEach(b => binary += String.fromCharCode(b));
+                payload.set(iv, 0); payload.set(new Uint8Array(ciphertext), iv.byteLength);
+                let binary = ''; payload.forEach(b => binary += String.fromCharCode(b));
                 return btoa(binary);
-            } catch (e) {
-                console.error("Encryption failed", e);
-                return null;
-            }
+            } catch (e) { return null; }
         }
 
         async function decryptData(base64Str) {
@@ -292,50 +315,35 @@
                 const payload = new Uint8Array(binary.length);
                 for(let i=0; i<binary.length; i++) payload[i] = binary.charCodeAt(i);
                 
-                const iv = payload.slice(0, 12);
-                const data = payload.slice(12);
+                const iv = payload.slice(0, 12); const data = payload.slice(12);
                 const decrypted = await window.crypto.subtle.decrypt({name: "AES-GCM", iv: iv}, cryptoKey, data);
                 return new TextDecoder().decode(decrypted);
-            } catch (e) {
-                return "[Encrypted Message - Unreadable]";
-            }
+            } catch (e) { return "[Encrypted Message - Unreadable]"; }
         }
 
         /* =========================================
-           2. HARDWARE AUDIO (BEEPS)
+           2. AUDIO & UI MGT
            ========================================= */
         function playSound(type = 'msg') {
             try {
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.connect(gain);
-                gain.connect(ctx.destination);
+                const osc = ctx.createOscillator(); const gain = ctx.createGain();
+                osc.connect(gain); gain.connect(ctx.destination);
                 
                 if (type === 'msg') {
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(880, ctx.currentTime);
+                    osc.type = 'sine'; osc.frequency.setValueAtTime(880, ctx.currentTime);
                     osc.frequency.exponentialRampToValueAtTime(1760, ctx.currentTime + 0.1);
-                    gain.gain.setValueAtTime(0.05, ctx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
-                    osc.start(ctx.currentTime);
-                    osc.stop(ctx.currentTime + 0.1);
+                    gain.gain.setValueAtTime(0.05, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+                    osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.1);
                 } else if (type === 'success') {
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(440, ctx.currentTime);
-                    osc.frequency.setValueAtTime(554.37, ctx.currentTime + 0.1);
-                    osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.2);
-                    gain.gain.setValueAtTime(0.05, ctx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
-                    osc.start(ctx.currentTime);
-                    osc.stop(ctx.currentTime + 0.3);
+                    osc.type = 'triangle'; osc.frequency.setValueAtTime(440, ctx.currentTime);
+                    osc.frequency.setValueAtTime(554.37, ctx.currentTime + 0.1); osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.2);
+                    gain.gain.setValueAtTime(0.05, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                    osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.3);
                 }
             } catch(e) {} 
         }
 
-        /* =========================================
-           3. UI & STATE MANAGEMENT
-           ========================================= */
         const htmlEl = document.documentElement;
         const btnTheme = document.getElementById('btn-theme-toggle');
         const iconSun = document.getElementById('icon-sun');
@@ -343,22 +351,16 @@
         
         function toggleTheme() {
             if (htmlEl.classList.contains('dark')) {
-                htmlEl.classList.remove('dark');
-                localStorage.setItem('theme', 'light');
-                iconSun.classList.add('hidden');
-                iconMoon.classList.remove('hidden');
+                htmlEl.classList.remove('dark'); localStorage.setItem('theme', 'light');
+                iconSun.classList.add('hidden'); iconMoon.classList.remove('hidden');
             } else {
-                htmlEl.classList.add('dark');
-                localStorage.setItem('theme', 'dark');
-                iconMoon.classList.add('hidden');
-                iconSun.classList.remove('hidden');
+                htmlEl.classList.add('dark'); localStorage.setItem('theme', 'dark');
+                iconMoon.classList.add('hidden'); iconSun.classList.remove('hidden');
             }
         }
         
         if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            htmlEl.classList.add('dark');
-            iconMoon.classList.add('hidden');
-            iconSun.classList.remove('hidden');
+            htmlEl.classList.add('dark'); iconMoon.classList.add('hidden'); iconSun.classList.remove('hidden');
         }
         btnTheme.addEventListener('click', toggleTheme);
 
@@ -373,28 +375,25 @@
         function switchView(viewId) {
             ['view-home', 'view-waiting', 'view-chat', 'view-scanner'].forEach(id => {
                 const el = document.getElementById(id);
-                el.classList.add('hidden');
-                el.classList.remove('flex');
+                el.classList.add('hidden'); el.classList.remove('flex');
             });
             const target = document.getElementById(viewId);
-            target.classList.remove('hidden');
-            target.classList.add('flex');
+            target.classList.remove('hidden'); target.classList.add('flex');
         }
 
-        const savedState = sessionStorage.getItem('nexus_state_v4');
-        const defaultState = {
-            clientId: 'cli_' + Math.random().toString(36).substr(2, 9),
-            myName: getRandomInventor(),
-            otherName: 'Unknown',
-            sessionId: null, role: null, isChatActive: false, chatHistory: [] 
-        };
-        
-        const AppState = savedState ? 
-            { ...defaultState, ...JSON.parse(savedState), mqtt: null } : 
-            { ...defaultState, mqtt: null };
+        const savedState = sessionStorage.getItem('nexus_state_v5');
+        const defaultState = { clientId: 'cli_' + Math.random().toString(36).substr(2, 9), myName: '', otherName: i18n[currentLang].unknownUser, sessionId: null, role: null, isChatActive: false, chatHistory: [] };
+        const AppState = savedState ? { ...defaultState, ...JSON.parse(savedState), mqtt: null } : { ...defaultState, mqtt: null };
+
+        function getSafeName() {
+            let n = document.getElementById('input-my-name').value.trim();
+            // XSS Filter
+            n = n.replace(/</g, "").replace(/>/g, "").substring(0, 20);
+            return n || "User-" + Math.floor(Math.random() * 1000);
+        }
 
         function saveState() {
-            sessionStorage.setItem('nexus_state_v4', JSON.stringify({
+            sessionStorage.setItem('nexus_state_v5', JSON.stringify({
                 clientId: AppState.clientId, myName: AppState.myName, otherName: AppState.otherName,
                 sessionId: AppState.sessionId, role: AppState.role, isChatActive: AppState.isChatActive, chatHistory: AppState.chatHistory
             }));
@@ -412,29 +411,39 @@
             document.getElementById('chat-avatar').innerText = AppState.otherName.charAt(0);
         }
 
+        /* Modal Image */
+        function openImageModal(src) {
+            const modal = document.getElementById('image-modal'); const img = document.getElementById('modal-image-src');
+            img.src = src; modal.classList.remove('hidden');
+            setTimeout(() => { modal.classList.remove('opacity-0'); img.classList.remove('scale-95'); img.classList.add('scale-100'); }, 10);
+        }
+        function closeImageModal() {
+            const modal = document.getElementById('image-modal'); const img = document.getElementById('modal-image-src');
+            modal.classList.add('opacity-0'); img.classList.remove('scale-100'); img.classList.add('scale-95');
+            setTimeout(() => { modal.classList.add('hidden'); img.src = ''; }, 300);
+        }
+        document.getElementById('btn-close-image').addEventListener('click', closeImageModal);
+        document.getElementById('image-modal').addEventListener('click', (e) => { if(e.target.id === 'image-modal') closeImageModal(); });
+
         /* =========================================
-           4. MQTT NETWORK LOGIC
+           4. MQTT LOGIC
            ========================================= */
         function connectMQTT(callback, brokerIndex = 0) {
             if (typeof mqtt === 'undefined') return callback(false, "System libraries failed to load.");
             if (AppState.mqtt && AppState.mqtt.connected) return callback(true);
-            
             if (AppState.mqtt) AppState.mqtt.end();
             const brokers = ['wss://broker.hivemq.com:8443/mqtt', 'wss://broker.emqx.io:8084/mqtt', 'wss://test.mosquitto.org:8081/mqtt'];
             let isResolved = false;
 
             function tryConnect(idx) {
-                if (idx >= brokers.length) return isResolved || (isResolved = true, callback(false, "Network blocks WebSockets."));
+                if (idx >= brokers.length) return isResolved || (isResolved = true, callback(false, i18n[currentLang].unreachable));
                 try {
                     const client = mqtt.connect(brokers[idx], { connectTimeout: 4000, reconnectPeriod: 2000, keepalive: 30 });
                     let timer = setTimeout(() => { if (!client.connected && !isResolved) { client.end(); tryConnect(idx + 1); } }, 4500);
                     client.on('connect', () => {
                         clearTimeout(timer);
                         if (!isResolved) {
-                            isResolved = true;
-                            AppState.mqtt = client;
-                            AppState.mqtt.on('message', handleIncomingMessage);
-                            callback(true, null, idx); 
+                            isResolved = true; AppState.mqtt = client; AppState.mqtt.on('message', handleIncomingMessage); callback(true, null, idx); 
                         }
                     });
                     client.on('error', () => { if (!isResolved) { clearTimeout(timer); client.end(); tryConnect(idx + 1); } });
@@ -454,18 +463,15 @@
             if (topic === sysTopic) {
                 if (AppState.role === 'host' && data.type === 'join_request') {
                     AppState.guestWaitingId = data.senderId;
-                    AppState.otherName = data.senderName || "Unknown Guest";
-                    document.getElementById('permission-name').innerText = `${AppState.otherName} wants to connect.`;
-                    showApprovalModal();
-                    playSound('msg');
+                    AppState.otherName = data.senderName || i18n[currentLang].unknownUser;
+                    document.getElementById('permission-name').innerText = `${AppState.otherName} ${i18n[currentLang].wantsToConnect}`;
+                    showApprovalModal(); playSound('msg');
                 } 
                 else if (AppState.role === 'guest' && data.type === 'join_response' && data.targetId === AppState.clientId) {
                     if (data.status === 'accepted') {
-                        AppState.otherName = data.senderName || "Unknown Host";
-                        showToast(`Connected to ${AppState.otherName}!`);
-                        playSound('success');
-                        startChat();
-                    } else { showToast("Connection Rejected.", true); resetApp(); }
+                        AppState.otherName = data.senderName || i18n[currentLang].unknownUser;
+                        playSound('success'); startChat();
+                    } else { showToast(i18n[currentLang].rejected, true); resetApp(); }
                 }
                 else if (data.type === 'typing') {
                     const ind = document.getElementById('typing-indicator');
@@ -473,73 +479,72 @@
                     if (data.status === 'start') { ind.classList.remove('hidden'); ind.classList.add('flex'); scrollChatToBottom(); }
                     else { ind.classList.add('hidden'); ind.classList.remove('flex'); }
                 }
-                else if (data.type === 'leave') { showToast(`${AppState.otherName} disconnected.`, true); resetApp(); }
+                else if (data.type === 'leave') { showToast(`${AppState.otherName} ${i18n[currentLang].disconnected}`, true); resetApp(); }
             }
             else if (topic === chatTopic && data.type === 'chat') {
-                const ind = document.getElementById('typing-indicator');
-                ind.classList.add('hidden'); ind.classList.remove('flex');
-                
+                document.getElementById('typing-indicator').classList.add('hidden');
                 const decryptedStr = await decryptData(data.payload);
                 if (decryptedStr) {
                     try {
                         const parsedPayload = JSON.parse(decryptedStr);
-                        renderMessage(parsedPayload, 'other');
-                        playSound('msg');
+                        renderMessage(parsedPayload, 'other', data.senderName); playSound('msg');
                     } catch(e) {} 
                 }
             }
         }
 
         /* =========================================
-           5. CHAT, MEDIA & CAMERA LOGIC
+           5. CHAT & MEDIA
            ========================================= */
         async function sendEncryptedMessage(payloadObj) {
             if (!AppState.mqtt || !cryptoKey) return;
             const jsonStr = JSON.stringify(payloadObj);
             const encryptedPayload = await encryptData(jsonStr);
             if (encryptedPayload) {
-                const msg = { type: 'chat', senderId: AppState.clientId, payload: encryptedPayload };
+                const msg = { type: 'chat', senderId: AppState.clientId, senderName: AppState.myName, payload: encryptedPayload };
                 AppState.mqtt.publish(`qchat/${AppState.sessionId}`, JSON.stringify(msg), { qos: 0 });
-                renderMessage(payloadObj, 'me');
+                renderMessage(payloadObj, 'me', AppState.myName);
             }
         }
 
-        function renderMessage(payload, senderType, shouldSave = true) {
+        function renderMessage(payload, senderType, senderName, shouldSave = true) {
             const container = document.getElementById('chat-messages');
             const wrapper = document.createElement('div');
             wrapper.className = `flex w-full ${senderType === 'me' ? 'justify-end' : 'justify-start'} z-10 relative mb-2`;
             
             const msgDiv = document.createElement('div');
-            msgDiv.className = `max-w-[80%] px-3 py-2 rounded-xl text-[15px] shadow-sm break-words relative ${senderType === 'me' ? 'chat-bubble-me' : 'chat-bubble-other'}`;
+            msgDiv.className = `max-w-[80%] px-3 py-2 rounded-xl text-[15px] shadow-sm break-words relative flex flex-col ${senderType === 'me' ? 'chat-bubble-me' : 'chat-bubble-other'}`;
             
+            // Name Header inside bubble
+            const nameSpan = document.createElement('span');
+            nameSpan.className = `text-[11px] font-bold mb-1 opacity-80 ${senderType === 'me' ? 'text-teal-700 dark:text-teal-300' : 'text-blue-600 dark:text-blue-400'}`;
+            nameSpan.textContent = senderName || (senderType === 'me' ? AppState.myName : AppState.otherName);
+            msgDiv.appendChild(nameSpan);
+
             if (payload.type === 'text') {
-                msgDiv.textContent = payload.data;
+                const textSpan = document.createElement('span');
+                textSpan.textContent = payload.data; // Safe injection
+                msgDiv.appendChild(textSpan);
             } else if (payload.type === 'image') {
                 const img = document.createElement('img');
                 img.src = payload.data;
-                img.className = 'rounded-md max-w-full h-auto cursor-pointer object-cover max-h-64';
-                img.onclick = () => {
-                    const w = window.open("");
-                    w.document.write(`<body style="margin:0;background:#000;display:flex;align-items:center;justify-content:center;height:100vh;"><img src="${payload.data}" style="max-width:100%;max-height:100vh;"></body>`);
-                };
+                img.className = 'rounded-md max-w-full h-auto cursor-pointer object-contain bg-black/5 dark:bg-white/5 mt-1';
+                img.onclick = () => openImageModal(payload.data);
                 msgDiv.appendChild(img);
             }
             
             const timeSpan = document.createElement('span');
             const now = new Date();
             timeSpan.textContent = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
-            timeSpan.className = `block text-[10px] text-right mt-1 opacity-70 ${senderType === 'me' ? 'text-gray-700 dark:text-gray-200' : 'text-gray-500'}`;
+            timeSpan.className = `text-[10px] text-end mt-1 opacity-70 ${senderType === 'me' ? 'text-gray-700 dark:text-gray-200' : 'text-gray-500'}`;
             msgDiv.appendChild(timeSpan);
 
             wrapper.appendChild(msgDiv);
-            
-            const typingInd = document.getElementById('typing-indicator');
-            container.insertBefore(wrapper, typingInd);
-            
+            container.insertBefore(wrapper, document.getElementById('typing-indicator'));
             scrollChatToBottom();
 
             if (shouldSave) {
-                AppState.chatHistory.push({ payload, senderType });
+                AppState.chatHistory.push({ payload, senderType, senderName });
                 saveState();
             }
         }
@@ -551,215 +556,149 @@
 
         function loadChatHistory() {
             const container = document.getElementById('chat-messages');
+            const tInd = document.getElementById('typing-indicator').outerHTML;
             container.innerHTML = `
             <div class="text-center w-full my-2">
-                <span class="bg-[#ffeecd] dark:bg-[#182229] text-gray-700 dark:text-[#ffd279] text-xs px-3 py-1.5 rounded-lg shadow-sm inline-block max-w-xs leading-relaxed text-center">
-                    🔒 Messages are end-to-end encrypted. No one outside of this chat can read or listen to them.
+                <span class="bg-[#ffeecd] dark:bg-[#182229] text-gray-700 dark:text-[#ffd279] text-xs px-3 py-1.5 rounded-lg shadow-sm inline-block max-w-xs leading-relaxed text-center" data-i18n="e2eMsg">
+                    ${i18n[currentLang].e2eMsg}
                 </span>
-            </div>
-            <div id="typing-indicator" class="hidden self-start bg-white dark:bg-[#202c33] text-gray-500 dark:text-gray-400 text-xs px-4 py-2 rounded-2xl rounded-tl-sm shadow-sm items-center space-x-1 w-max mt-2">
-                <span id="typing-name" class="font-medium mr-1">User</span>
-                <span>is typing</span>
-                <span class="w-1 h-1 bg-gray-400 rounded-full animate-bounce mx-0.5"></span>
-                <span class="w-1 h-1 bg-gray-400 rounded-full animate-bounce mx-0.5" style="animation-delay: 0.2s"></span>
-                <span class="w-1 h-1 bg-gray-400 rounded-full animate-bounce mx-0.5" style="animation-delay: 0.4s"></span>
-            </div>`;
+            </div>` + tInd;
             
-            AppState.chatHistory.forEach(item => renderMessage(item.payload, item.senderType, false));
+            AppState.chatHistory.forEach(item => renderMessage(item.payload, item.senderType, item.senderName, false));
         }
 
-        // Image Attachment (Security limits applied)
         document.getElementById('btn-attach').addEventListener('click', () => document.getElementById('file-input').click());
         document.getElementById('file-input').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            // Strict check for image only
-            if (!file.type.startsWith('image/')) return showToast("Invalid file type.", true);
+            const file = e.target.files[0]; if (!file) return;
+            if (!file.type.startsWith('image/')) return;
             
             const reader = new FileReader();
             reader.onload = function(event) {
                 const img = new Image();
                 img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 800; // Limit rendering size to protect memory
+                    const canvas = document.createElement('canvas'); const MAX_WIDTH = 800; 
                     const scaleSize = MAX_WIDTH / img.width;
                     canvas.width = Math.min(MAX_WIDTH, img.width);
                     canvas.height = img.width > MAX_WIDTH ? img.height * scaleSize : img.height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    const base64Img = canvas.toDataURL('image/jpeg', 0.6); 
-                    sendEncryptedMessage({ type: 'image', data: base64Img });
+                    const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    sendEncryptedMessage({ type: 'image', data: canvas.toDataURL('image/jpeg', 0.6) });
                 }
                 img.src = event.target.result;
             }
-            reader.readAsDataURL(file);
-            e.target.value = ''; 
+            reader.readAsDataURL(file); e.target.value = ''; 
         });
 
-        // Fullscreen HTML5 QR Scanner
         let html5QrcodeScanner = null;
-        let scannerMode = 'chat'; // 'join' or 'chat'
-
-        function openScanner(mode) {
-            if (typeof Html5Qrcode === 'undefined') return showToast("Scanner library not loaded.", true);
-            scannerMode = mode;
-            document.getElementById('scanner-title').innerText = mode === 'join' ? "Scan QR to Join" : "Scan Barcode / QR";
+        function openScanner() {
+            if (typeof Html5Qrcode === 'undefined') return;
             switchView('view-scanner'); 
-            
             html5QrcodeScanner = new Html5Qrcode("reader");
             html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } }, 
             (decodedText) => {
-                playSound('success');
-                closeScanner();
-
-                if (scannerMode === 'join') {
-                    // Security Regex: Extract the 7-character session code from URL or pure text
-                    const match = decodedText.match(/[?&]session=([A-Z0-9]{7})/i);
-                    let code = match ? match[1] : decodedText.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
-                    
-                    if (code.length >= 7) {
-                        document.getElementById('input-join-code').value = code.substring(0, 7);
-                        document.getElementById('btn-join-room').click(); // Auto join
-                    } else {
-                        showToast("Invalid Node QR Code.", true);
-                    }
-                } else {
-                    // Chat mode barcode security limit
-                    const safeText = decodedText.substring(0, 2000); 
-                    sendEncryptedMessage({ type: 'text', data: `[BARCODE]: ${safeText}` });
+                playSound('success'); closeScanner();
+                const match = decodedText.match(/[?&]session=([A-Z0-9]{7})/i);
+                let code = match ? match[1] : decodedText.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+                if (code.length >= 7) {
+                    document.getElementById('input-join-code').value = code.substring(0, 7);
+                    document.getElementById('btn-join-room').click(); 
                 }
-            }, (error) => {}).catch(err => {
-                closeScanner();
-                showToast("Camera permission denied.", true);
-            });
+            }, (error) => {}).catch(err => { closeScanner(); });
         }
-
-        document.getElementById('btn-home-scan').addEventListener('click', () => openScanner('join'));
-        document.getElementById('btn-camera').addEventListener('click', () => openScanner('chat'));
+        document.getElementById('btn-home-scan').addEventListener('click', () => openScanner());
         
         function closeScanner() {
             if(html5QrcodeScanner) {
-                html5QrcodeScanner.stop().then(() => {
-                    html5QrcodeScanner = null;
-                    switchView(scannerMode === 'join' ? 'view-home' : 'view-chat');
-                }).catch(() => { switchView(scannerMode === 'join' ? 'view-home' : 'view-chat'); });
-            } else { switchView(scannerMode === 'join' ? 'view-home' : 'view-chat'); }
+                html5QrcodeScanner.stop().then(() => { html5QrcodeScanner = null; switchView('view-home'); }).catch(() => switchView('view-home'));
+            } else { switchView('view-home'); }
         }
         document.getElementById('btn-close-scanner').addEventListener('click', closeScanner);
 
-        // Typing Indicator Logic
         let typingTimer;
         document.getElementById('input-chat').addEventListener('input', function() {
-            this.style.height = 'auto';
-            this.style.height = (this.scrollHeight) + 'px';
-
+            this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px';
             if(!AppState.mqtt) return;
             AppState.mqtt.publish(`qsys/${AppState.sessionId}`, JSON.stringify({type: 'typing', senderId: AppState.clientId, status: 'start'}), {qos:0});
             clearTimeout(typingTimer);
-            typingTimer = setTimeout(() => {
-                AppState.mqtt.publish(`qsys/${AppState.sessionId}`, JSON.stringify({type: 'typing', senderId: AppState.clientId, status: 'stop'}), {qos:0});
-            }, 1000);
+            typingTimer = setTimeout(() => { AppState.mqtt.publish(`qsys/${AppState.sessionId}`, JSON.stringify({type: 'typing', senderId: AppState.clientId, status: 'stop'}), {qos:0}); }, 1000);
         });
 
         /* =========================================
-           6. INITIALIZATION & EVENTS
+           6. EVENTS & INIT
            ========================================= */
         document.addEventListener('DOMContentLoaded', async () => {
+            applyLanguage(currentLang);
+            if(AppState.myName) document.getElementById('input-my-name').value = AppState.myName;
+
             if (AppState.sessionId && AppState.role) {
                 cryptoKey = await deriveKey(AppState.sessionId);
                 let bIndex = ['H', 'E', 'M'].indexOf(AppState.sessionId.charAt(0));
                 
                 if (AppState.role === 'host') {
-                    document.getElementById('display-session-code').innerText = AppState.sessionId;
-                    generateQR(AppState.sessionId);
-                    if (AppState.isChatActive) { updateChatHeader(); switchView('view-chat'); loadChatHistory(); } 
-                    else { switchView('view-waiting'); }
+                    document.getElementById('display-session-code').innerText = AppState.sessionId; generateQR(AppState.sessionId);
+                    if (AppState.isChatActive) { updateChatHeader(); switchView('view-chat'); loadChatHistory(); } else { switchView('view-waiting'); }
                 } else {
                     document.getElementById('input-join-code').value = AppState.sessionId;
-                    if (AppState.isChatActive) { updateChatHeader(); switchView('view-chat'); loadChatHistory(); } 
-                    else { switchView('view-home'); }
+                    if (AppState.isChatActive) { updateChatHeader(); switchView('view-chat'); loadChatHistory(); } else { switchView('view-home'); }
                 }
 
                 connectMQTT((success) => {
                     if (success) {
                         AppState.mqtt.subscribe(`qsys/${AppState.sessionId}`, { qos: 0 });
-                        if (AppState.isChatActive) {
-                            AppState.mqtt.subscribe(`qchat/${AppState.sessionId}`, { qos: 0 });
-                        } else if (AppState.role === 'guest') {
-                            AppState.mqtt.publish(`qsys/${AppState.sessionId}`, JSON.stringify({ type: 'join_request', senderId: AppState.clientId, senderName: AppState.myName }), { qos: 0 });
-                        }
+                        if (AppState.isChatActive) { AppState.mqtt.subscribe(`qchat/${AppState.sessionId}`, { qos: 0 }); } 
+                        else if (AppState.role === 'guest') { AppState.mqtt.publish(`qsys/${AppState.sessionId}`, JSON.stringify({ type: 'join_request', senderId: AppState.clientId, senderName: AppState.myName }), { qos: 0 }); }
                     } else resetApp();
                 }, bIndex === -1 ? 0 : bIndex);
             } else {
                 const sessionFromUrl = new URLSearchParams(window.location.search).get('session');
                 if (sessionFromUrl) {
-                    // Clean injected session code
                     document.getElementById('input-join-code').value = sessionFromUrl.replace(/[^a-zA-Z0-9]/g, '').substring(0, 7);
                     setTimeout(() => document.getElementById('btn-join-room').click(), 500); 
                 }
             }
 
-            // Create Room
-            const btnCreate = document.getElementById('btn-create-room');
-            btnCreate.addEventListener('click', () => {
-                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-                let code = 'H'; 
+            document.getElementById('btn-create-room').addEventListener('click', () => {
+                AppState.myName = getSafeName();
+                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'; let code = 'H'; 
                 for (let i = 0; i < 6; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
                 
+                const btnCreate = document.getElementById('btn-create-room');
                 const oldContent = btnCreate.innerHTML;
-                btnCreate.innerHTML = '<span class="animate-pulse">Securing Node...</span>';
-                btnCreate.disabled = true;
+                btnCreate.innerHTML = `<span class="animate-pulse">${i18n[currentLang].connecting}</span>`; btnCreate.disabled = true;
 
                 connectMQTT(async (success, errorMsg) => {
-                    btnCreate.innerHTML = oldContent;
-                    btnCreate.disabled = false;
+                    btnCreate.innerHTML = oldContent; btnCreate.disabled = false;
                     if (!success) return showToast(errorMsg, true);
 
-                    AppState.role = 'host';
-                    AppState.sessionId = code;
-                    cryptoKey = await deriveKey(code); 
-                    
-                    AppState.isChatActive = false;
-                    AppState.chatHistory = [];
-                    saveState(); 
+                    AppState.role = 'host'; AppState.sessionId = code; cryptoKey = await deriveKey(code); 
+                    AppState.isChatActive = false; AppState.chatHistory = []; saveState(); 
 
                     AppState.mqtt.subscribe(`qsys/${AppState.sessionId}`, { qos: 0 });
                     document.getElementById('display-session-code').innerText = AppState.sessionId;
-                    generateQR(AppState.sessionId);
-                    switchView('view-waiting');
-                    playSound('success');
+                    generateQR(AppState.sessionId); switchView('view-waiting'); playSound('success');
                 });
             });
 
-            // Join Room
             const btnJoin = document.getElementById('btn-join-room');
             btnJoin.addEventListener('click', () => {
-                // Security limit
+                AppState.myName = getSafeName();
                 const code = document.getElementById('input-join-code').value.replace(/[^a-zA-Z0-9]/g, '').substring(0, 7).toUpperCase();
-                if (code.length !== 7) return showToast("Enter 7-character code.", true);
+                if (code.length !== 7) return showToast(i18n[currentLang].invalidCode, true);
                 let bIndex = ['H', 'E', 'M'].indexOf(code.charAt(0));
                 
-                btnJoin.innerText = "Connecting...";
-                btnJoin.disabled = true;
+                btnJoin.innerText = i18n[currentLang].connecting; btnJoin.disabled = true;
                 
                 connectMQTT(async (success, errorMsg) => {
-                    btnJoin.innerText = "Connect Device";
-                    btnJoin.disabled = false;
+                    btnJoin.innerText = i18n[currentLang].connectBtn; btnJoin.disabled = false;
                     if (!success) return showToast(errorMsg, true);
 
-                    AppState.role = 'guest';
-                    AppState.sessionId = code;
-                    cryptoKey = await deriveKey(code); 
-
-                    AppState.isChatActive = false;
-                    AppState.chatHistory = [];
-                    saveState(); 
+                    AppState.role = 'guest'; AppState.sessionId = code; cryptoKey = await deriveKey(code); 
+                    AppState.isChatActive = false; AppState.chatHistory = []; saveState(); 
 
                     AppState.mqtt.subscribe(`qsys/${AppState.sessionId}`, { qos: 0 }, (err) => {
                         if(!err) {
                             AppState.mqtt.publish(`qsys/${AppState.sessionId}`, JSON.stringify({ type: 'join_request', senderId: AppState.clientId, senderName: AppState.myName }), { qos: 0 });
-                            showToast("Identity sent, waiting for host...");
-                        } else showToast("Cannot reach node.", true);
+                            showToast(i18n[currentLang].waitingHost);
+                        } else showToast(i18n[currentLang].unreachable, true);
                     });
                 }, bIndex === -1 ? 0 : bIndex);
             });
@@ -770,81 +709,46 @@
                 resetApp();
             });
 
-            // Chat Submit
             document.getElementById('btn-send-msg').addEventListener('click', () => {
-                const input = document.getElementById('input-chat');
-                const text = input.value.trim().substring(0, 2000); // 2000 chars limit
-                if (text) {
-                    sendEncryptedMessage({ type: 'text', data: text });
-                    input.value = '';
-                    input.style.height = 'auto'; // reset height
-                }
+                const input = document.getElementById('input-chat'); const text = input.value.trim().substring(0, 2000); 
+                if (text) { sendEncryptedMessage({ type: 'text', data: text }); input.value = ''; input.style.height = 'auto'; }
             });
             document.getElementById('input-chat').addEventListener('keydown', function(e) {
-                if(e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    document.getElementById('btn-send-msg').click();
-                }
+                if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); document.getElementById('btn-send-msg').click(); }
             });
 
-            // Modal Approvals
             document.getElementById('btn-approve').addEventListener('click', () => {
                 AppState.mqtt.publish(`qsys/${AppState.sessionId}`, JSON.stringify({ type: 'join_response', senderId: AppState.clientId, targetId: AppState.guestWaitingId, status: 'accepted', senderName: AppState.myName }), { qos: 0 });
-                closeApprovalModal();
-                playSound('success');
-                startChat();
+                closeApprovalModal(); playSound('success'); startChat();
             });
             document.getElementById('btn-reject').addEventListener('click', () => {
                 AppState.mqtt.publish(`qsys/${AppState.sessionId}`, JSON.stringify({ type: 'join_response', senderId: AppState.clientId, targetId: AppState.guestWaitingId, status: 'rejected' }), { qos: 0 });
-                closeApprovalModal();
-                AppState.guestWaitingId = null;
+                closeApprovalModal(); AppState.guestWaitingId = null;
             });
             
-            // Copy Link
             document.getElementById('btn-copy-link').addEventListener('click', () => {
                 const url = `${window.location.href.split('?')[0]}?session=${AppState.sessionId}`;
-                if (navigator.clipboard && window.isSecureContext) {
-                    navigator.clipboard.writeText(url).then(() => showToast("Link Copied!"));
-                } else {
-                    const ta = document.createElement("textarea"); ta.value = url; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); showToast("Link Copied!");
-                }
+                if (navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(url).then(() => showToast(i18n[currentLang].copied));
+                } else { const ta = document.createElement("textarea"); ta.value = url; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); showToast(i18n[currentLang].copied); }
             });
         });
 
         function startChat() {
-            AppState.isChatActive = true;
-            updateChatHeader();
-            saveState(); 
+            AppState.isChatActive = true; updateChatHeader(); saveState(); 
             AppState.mqtt.subscribe(`qchat/${AppState.sessionId}`, { qos: 0 });
-            switchView('view-chat');
-            setTimeout(scrollChatToBottom, 100);
+            switchView('view-chat'); setTimeout(scrollChatToBottom, 100);
         }
 
         function resetApp() {
-            if (AppState.mqtt) {
-                if(AppState.sessionId) AppState.mqtt.unsubscribe(`qsys/${AppState.sessionId}`);
-                if(AppState.sessionId) AppState.mqtt.unsubscribe(`qchat/${AppState.sessionId}`);
-            }
-            AppState.sessionId = null; AppState.role = null; AppState.isChatActive = false; AppState.guestWaitingId = null; AppState.chatHistory = []; cryptoKey = null; AppState.otherName = 'Unknown';
+            if (AppState.mqtt) { if(AppState.sessionId) { AppState.mqtt.unsubscribe(`qsys/${AppState.sessionId}`); AppState.mqtt.unsubscribe(`qchat/${AppState.sessionId}`); } }
+            AppState.sessionId = null; AppState.role = null; AppState.isChatActive = false; AppState.guestWaitingId = null; AppState.chatHistory = []; cryptoKey = null; AppState.otherName = i18n[currentLang].unknownUser;
             saveState(); 
-            
-            document.getElementById('input-join-code').value = '';
-            document.getElementById('btn-join-room').innerText = "Connect Device";
-            if(html5QrcodeScanner) closeScanner();
-            switchView('view-home');
+            document.getElementById('input-join-code').value = ''; document.getElementById('btn-join-room').innerText = i18n[currentLang].connectBtn;
+            if(html5QrcodeScanner) closeScanner(); switchView('view-home');
         }
 
-        function showApprovalModal() {
-            document.getElementById('waiting-spinner').classList.add('hidden');
-            const area = document.getElementById('area-room-permission');
-            area.classList.remove('hidden');
-        }
-
-        function closeApprovalModal() {
-            const area = document.getElementById('area-room-permission');
-            area.classList.add('hidden');
-            if (!AppState.isChatActive) document.getElementById('waiting-spinner').classList.remove('hidden');
-        }
+        function showApprovalModal() { document.getElementById('waiting-spinner').classList.add('hidden'); document.getElementById('area-room-permission').classList.remove('hidden'); }
+        function closeApprovalModal() { document.getElementById('area-room-permission').classList.add('hidden'); if (!AppState.isChatActive) document.getElementById('waiting-spinner').classList.remove('hidden'); }
     </script>
 </body>
 </html>
