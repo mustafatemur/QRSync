@@ -1,26 +1,37 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="transition-colors duration-300">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- SECURITY: Strict Content Security Policy to prevent unauthorized script injections -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline'; connect-src 'self' wss://broker.emqx.io:8084 wss://broker.hivemq.com:8443 wss://test.mosquitto.org:8081;">
-    <title>QRSync - Secure Communication</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- SECURITY: Strict Content Security Policy (Updated for Data URIs and Unpkg) -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://unpkg.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' wss://broker.emqx.io:8084 wss://broker.hivemq.com:8443 wss://test.mosquitto.org:8081;">
+    <title>QRSync - Secure Terminal</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- QRCode.js -->
+    <!-- Tailwind Dark Mode Config -->
+    <script>
+        tailwind.config = { darkMode: 'class' }
+    </script>
+    <!-- QRCode.js (For generating QR) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <!-- MQTT.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/4.3.7/mqtt.min.js"></script>
+    <!-- HTML5-QRCode (For Camera Barcode Scanning) -->
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
         .glass-panel {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.90);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .dark .glass-panel {
+            background: rgba(31, 41, 55, 0.90);
+            border: 1px solid rgba(75, 85, 99, 0.4);
         }
         .chat-bubble-me {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
             color: white;
             border-bottom-right-radius: 0;
         }
@@ -29,110 +40,158 @@
             color: #1f2937;
             border-bottom-left-radius: 0;
         }
+        .dark .chat-bubble-other {
+            background: #374151;
+            color: #e5e7eb;
+        }
         /* Custom scrollbar */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .dark ::-webkit-scrollbar-thumb { background: #4b5563; }
+        
+        #reader { width: 100%; border-radius: 1rem; overflow: hidden; border: none !important; }
+        #reader video { border-radius: 1rem; object-fit: cover; }
     </style>
 </head>
-<body class="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 min-h-screen flex items-center justify-center p-4">
+<body class="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 min-h-screen flex items-center justify-center p-4 transition-colors duration-500">
 
-    <!-- HOME VIEW (Create or Join) -->
+    <!-- Top Right Controls (Dark Mode Toggle) -->
+    <div class="fixed top-4 right-4 z-50">
+        <button id="btn-theme-toggle" class="p-2 bg-white/20 hover:bg-white/40 dark:bg-gray-800/50 dark:hover:bg-gray-700 backdrop-blur-md rounded-full text-white transition-all shadow-lg">
+            <svg id="icon-sun" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            <svg id="icon-moon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+        </button>
+    </div>
+
+    <!-- HOME VIEW -->
     <div id="view-home" class="w-full max-w-md glass-panel rounded-3xl shadow-2xl p-8 text-center transition-all duration-300">
-        <div class="mb-6 text-indigo-600">
+        <div class="mb-6 text-indigo-600 dark:text-indigo-400">
             <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
         </div>
-        <h1 class="text-3xl font-bold text-gray-800 mb-2">QRSync</h1>
-        <p class="text-gray-500 text-sm mb-8">Establish encrypted, approved, and mutual communication between two devices.</p>
+        <h1 class="text-3xl font-bold text-gray-800 dark:text-white mb-2">QRSync</h1>
+        <p class="text-gray-500 dark:text-gray-400 text-sm mb-8">E2E Encrypted Terminal Connection.</p>
         
-        <button id="btn-create-room" class="w-full mb-6 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold py-3 px-4 rounded-xl shadow-lg transform transition active:scale-95 flex justify-center items-center disabled:opacity-75 disabled:cursor-not-allowed">
+        <button id="btn-create-room" class="w-full mb-6 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold py-3 px-4 rounded-xl shadow-lg transform transition active:scale-95 flex justify-center items-center">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-            <span>Create New Room</span>
+            <span>Create Secure Room</span>
         </button>
 
         <div class="relative flex py-3 items-center">
-            <div class="flex-grow border-t border-gray-300"></div>
-            <span class="flex-shrink-0 mx-4 text-gray-400 text-sm font-medium">OR JOIN WITH CODE</span>
-            <div class="flex-grow border-t border-gray-300"></div>
+            <div class="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
+            <span class="flex-shrink-0 mx-4 text-gray-400 dark:text-gray-500 text-sm font-medium">OR JOIN WITH CODE</span>
+            <div class="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
         </div>
 
         <div class="mt-4 space-y-3">
-            <input type="text" id="input-join-code" maxlength="7" class="w-full px-4 py-3 text-center text-2xl tracking-widest font-mono rounded-xl border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition uppercase" placeholder="_______">
-            <button id="btn-join-room" class="w-full bg-white border-2 border-indigo-500 text-indigo-600 hover:bg-indigo-50 font-bold py-3 px-4 rounded-xl shadow-sm transform transition active:scale-95 disabled:opacity-75 disabled:cursor-not-allowed">
-                Join Room
+            <input type="text" id="input-join-code" maxlength="7" class="w-full px-4 py-3 text-center text-2xl tracking-widest font-mono rounded-xl border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition uppercase" placeholder="_______">
+            <button id="btn-join-room" class="w-full bg-white dark:bg-gray-800 border-2 border-indigo-500 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-gray-700 font-bold py-3 px-4 rounded-xl shadow-sm transform transition active:scale-95">
+                Join Securely
             </button>
         </div>
     </div>
 
     <!-- HOST WAITING VIEW -->
     <div id="view-waiting" class="hidden w-full max-w-md glass-panel rounded-3xl shadow-2xl p-8 text-center transition-all duration-300">
-        <h2 class="text-2xl font-bold text-gray-800 mb-2">Waiting for Connection</h2>
-        <p class="text-gray-500 text-sm mb-6">Wait for the guest device to scan the QR code with their camera or enter the connection code.</p>
+        <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-2">Waiting for Connection</h2>
+        <p class="text-gray-500 dark:text-gray-400 text-sm mb-6">Scan QR or share the code.</p>
         
-        <div class="flex flex-col items-center justify-center bg-white p-6 rounded-2xl shadow-inner mx-auto w-max mb-6">
-            <div id="qrcode" class="mb-4"></div>
+        <div class="flex flex-col items-center justify-center bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-inner mx-auto w-max mb-6">
+            <div id="qrcode" class="mb-4 bg-white p-2 rounded-xl"></div>
             <div class="text-center">
-                <span class="text-xs text-gray-400 uppercase tracking-wider block mb-1">Connection Code</span>
-                <span id="display-session-code" class="text-2xl font-mono font-bold text-indigo-600 tracking-widest block mb-3"></span>
-                <button id="btn-copy-link" class="text-sm bg-indigo-50 hover:bg-indigo-100 text-indigo-600 py-1.5 px-4 rounded-lg font-medium transition flex items-center justify-center mx-auto active:scale-95">
+                <span class="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wider block mb-1">E2E Session Code</span>
+                <span id="display-session-code" class="text-2xl font-mono font-bold text-indigo-600 dark:text-indigo-400 tracking-widest block mb-3"></span>
+                <button id="btn-copy-link" class="text-sm bg-indigo-50 dark:bg-gray-700 hover:bg-indigo-100 dark:hover:bg-gray-600 text-indigo-600 dark:text-indigo-300 py-1.5 px-4 rounded-lg font-medium transition flex items-center justify-center mx-auto active:scale-95">
                     <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
                     Copy Link
                 </button>
             </div>
         </div>
         
-        <!-- Default Waiting Spinner -->
         <div id="waiting-spinner" class="flex items-center justify-center space-x-2 mb-6">
             <span class="w-3 h-3 rounded-full bg-yellow-400 animate-pulse"></span>
-            <span class="text-yellow-600 font-medium text-sm">Waiting for request...</span>
+            <span class="text-yellow-600 dark:text-yellow-500 font-medium text-sm">Listening for requests...</span>
         </div>
 
-        <!-- Embedded Room Permission Area for Mobile -->
-        <div id="area-room-permission" class="hidden bg-indigo-50 border border-indigo-100 rounded-2xl p-5 mb-6 shadow-sm w-full transition-all duration-300 transform scale-95 opacity-0">
+        <div id="area-room-permission" class="hidden bg-indigo-50 dark:bg-gray-800 border border-indigo-100 dark:border-gray-700 rounded-2xl p-5 mb-6 shadow-sm w-full transition-all duration-300 transform scale-95 opacity-0">
             <div class="flex items-center justify-center mb-4">
-                <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 mr-3">
+                <div class="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center text-indigo-600 dark:text-indigo-400 mr-3">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4"></path></svg>
                 </div>
                 <div class="text-left">
-                    <h4 class="font-bold text-gray-800 text-sm">Connection Request</h4>
-                    <p class="text-xs text-gray-500">A device wants to join.</p>
+                    <h4 class="font-bold text-gray-800 dark:text-white text-sm">Connection Request</h4>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">A device wants to join.</p>
                 </div>
             </div>
             <div class="flex space-x-2">
-                <button id="btn-reject" class="flex-1 py-2 px-3 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-bold rounded-xl transition text-sm shadow-sm">Reject</button>
+                <button id="btn-reject" class="flex-1 py-2 px-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-white font-bold rounded-xl transition text-sm">Reject</button>
                 <button id="btn-approve" class="flex-1 py-2 px-3 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl shadow-md transition text-sm">Approve</button>
             </div>
         </div>
 
-        <button id="btn-cancel-waiting" class="text-sm text-gray-500 hover:text-red-500 transition underline">Cancel & Return</button>
+        <button id="btn-cancel-waiting" class="text-sm text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition underline">Cancel & Return</button>
     </div>
 
-    <!-- CHAT VIEW -->
-    <div id="view-chat" class="hidden w-full max-w-2xl h-[80vh] flex flex-col glass-panel rounded-3xl shadow-2xl overflow-hidden transition-all duration-300">
-        <div class="bg-white px-6 py-4 border-b flex justify-between items-center shadow-sm z-10">
+    <!-- CHAT / TERMINAL VIEW -->
+    <div id="view-chat" class="hidden w-full max-w-2xl h-[85vh] flex flex-col glass-panel rounded-3xl shadow-2xl overflow-hidden transition-all duration-300">
+        
+        <!-- Header -->
+        <div class="bg-white dark:bg-gray-800 px-6 py-4 border-b dark:border-gray-700 flex justify-between items-center shadow-sm z-10">
             <div class="flex items-center space-x-3">
                 <div class="w-3 h-3 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]"></div>
                 <div>
-                    <h3 class="font-bold text-gray-800 leading-tight">QRSync Active</h3>
-                    <p class="text-xs text-gray-500" id="chat-role-text">Room Host</p>
+                    <h3 class="font-bold text-gray-800 dark:text-white leading-tight flex items-center">
+                        QRSync Terminal
+                        <svg class="w-4 h-4 ml-1 text-green-500" fill="currentColor" viewBox="0 0 20 20" title="AES-256 Encrypted"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path></svg>
+                    </h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400" id="chat-role-text">AES-256 E2EE Active</p>
                 </div>
             </div>
-            <button id="btn-leave-chat" class="text-red-500 hover:bg-red-50 p-2 rounded-lg transition" title="Disconnect">
+            <button id="btn-leave-chat" class="text-red-500 hover:bg-red-50 dark:hover:bg-gray-700 p-2 rounded-lg transition" title="Disconnect">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
             </button>
         </div>
 
-        <div id="chat-messages" class="flex-1 p-6 overflow-y-auto bg-gray-50/50 space-y-4 flex flex-col">
+        <!-- Camera Scanner Area (Hidden by default) -->
+        <div id="scanner-container" class="hidden bg-black w-full relative">
+            <div id="reader"></div>
+            <button id="btn-close-scanner" class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 shadow-lg">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+
+        <!-- Messages Area -->
+        <div id="chat-messages" class="flex-1 p-6 overflow-y-auto bg-gray-50/50 dark:bg-gray-900/50 space-y-4 flex flex-col relative">
             <div class="text-center w-full">
-                <span class="bg-gray-200 text-gray-600 text-xs px-3 py-1 rounded-full">Connection established. Messages are isolated and secure.</span>
+                <span class="bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs px-3 py-1 rounded-full">Encrypted connection established.</span>
+            </div>
+            <!-- Typing Indicator -->
+            <div id="typing-indicator" class="hidden absolute bottom-2 left-6 bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-xs px-3 py-1.5 rounded-full flex items-center space-x-1">
+                <span>Typing</span>
+                <span class="w-1 h-1 bg-gray-500 dark:bg-gray-400 rounded-full animate-bounce"></span>
+                <span class="w-1 h-1 bg-gray-500 dark:bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></span>
+                <span class="w-1 h-1 bg-gray-500 dark:bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.4s"></span>
             </div>
         </div>
 
-        <div class="bg-white p-4 border-t">
-            <form id="form-chat" class="flex space-x-2">
-                <input type="text" id="input-chat" maxlength="2000" class="flex-1 px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition" placeholder="Type your message or barcode data..." autocomplete="off">
-                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl px-6 font-bold shadow-md transition transform active:scale-95 flex items-center justify-center">
+        <!-- Input Area -->
+        <div class="bg-white dark:bg-gray-800 p-4 border-t dark:border-gray-700 relative">
+            <!-- Hidden File Input for images -->
+            <input type="file" id="file-input" accept="image/*" class="hidden">
+            
+            <form id="form-chat" class="flex items-center space-x-2">
+                <!-- Attach Photo Btn -->
+                <button type="button" id="btn-attach" class="text-gray-400 hover:text-indigo-500 dark:hover:text-indigo-400 p-2 transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
+                </button>
+                <!-- Camera Barcode Btn -->
+                <button type="button" id="btn-camera" class="text-gray-400 hover:text-indigo-500 dark:hover:text-indigo-400 p-2 transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                </button>
+
+                <input type="text" id="input-chat" maxlength="2000" class="flex-1 px-4 py-3 bg-gray-50 dark:bg-gray-700 dark:text-white rounded-xl border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition" placeholder="Message or barcode..." autocomplete="off">
+                
+                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl p-3 font-bold shadow-md transition transform active:scale-95 flex items-center justify-center">
                     <svg class="w-5 h-5 transform rotate-90" fill="currentColor" viewBox="0 0 20 20"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path></svg>
                 </button>
             </form>
@@ -140,453 +199,527 @@
     </div>
 
     <!-- NOTIFICATION TOAST -->
-    <div id="toast" class="fixed bottom-4 right-4 bg-gray-800 text-white px-6 py-3 rounded-xl shadow-2xl transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center pointer-events-none">
-        <span id="toast-msg">Error occurred.</span>
+    <div id="toast" class="fixed bottom-4 right-4 bg-gray-800 dark:bg-gray-700 text-white px-6 py-3 rounded-xl shadow-2xl transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center pointer-events-none">
+        <span id="toast-msg">Notification</span>
     </div>
 
     <script>
-        // Use HiveMQ as Primary (Index 0) for better stability, then EMQX, then Mosquitto
-        function generateSecureCode(brokerIndex) {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            const brokerPrefixes = ['H', 'E', 'M'];
-            let result = brokerPrefixes[brokerIndex] || 'H';
-            
-            if (window.crypto && window.crypto.getRandomValues) {
-                const values = new Uint32Array(6);
-                window.crypto.getRandomValues(values);
-                for (let i = 0; i < 6; i++) {
-                    result += chars[values[i] % chars.length];
-                }
-            } else {
-                for (let i = 0; i < 6; i++) {
-                    result += chars.charAt(Math.floor(Math.random() * chars.length));
-                }
-            }
-            return result;
+        /* =========================================
+           1. CRYPTOGRAPHY (AES-256 E2EE)
+           ========================================= */
+        let cryptoKey = null;
+
+        async function deriveKey(sessionCode) {
+            const enc = new TextEncoder();
+            const keyMaterial = await window.crypto.subtle.importKey(
+                "raw", enc.encode(sessionCode), {name: "PBKDF2"}, false, ["deriveBits", "deriveKey"]
+            );
+            return window.crypto.subtle.deriveKey(
+                { name: "PBKDF2", salt: enc.encode("qrsync_secure_salt_v1"), iterations: 100000, hash: "SHA-256" },
+                keyMaterial, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]
+            );
         }
+
+        async function encryptData(text) {
+            if (!cryptoKey) return text; // Fallback if crypto fails, though prevented logically
+            try {
+                const iv = window.crypto.getRandomValues(new Uint8Array(12));
+                const enc = new TextEncoder();
+                const ciphertext = await window.crypto.subtle.encrypt({name: "AES-GCM", iv: iv}, cryptoKey, enc.encode(text));
+                const payload = new Uint8Array(iv.byteLength + ciphertext.byteLength);
+                payload.set(iv, 0);
+                payload.set(new Uint8Array(ciphertext), iv.byteLength);
+                // Convert to Base64 safely
+                let binary = '';
+                payload.forEach(b => binary += String.fromCharCode(b));
+                return btoa(binary);
+            } catch (e) {
+                console.error("Encryption failed", e);
+                return null;
+            }
+        }
+
+        async function decryptData(base64Str) {
+            if (!cryptoKey) return base64Str;
+            try {
+                const binary = atob(base64Str);
+                const payload = new Uint8Array(binary.length);
+                for(let i=0; i<binary.length; i++) payload[i] = binary.charCodeAt(i);
+                
+                const iv = payload.slice(0, 12);
+                const data = payload.slice(12);
+                const decrypted = await window.crypto.subtle.decrypt({name: "AES-GCM", iv: iv}, cryptoKey, data);
+                return new TextDecoder().decode(decrypted);
+            } catch (e) {
+                console.error("Decryption failed (Wrong Key or Corrupted)", e);
+                return "[Encrypted Message - Unreadable]";
+            }
+        }
+
+        /* =========================================
+           2. HARDWARE AUDIO (BEEPS)
+           ========================================= */
+        function playSound(type = 'msg') {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                
+                if (type === 'msg') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(880, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(1760, ctx.currentTime + 0.1);
+                    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+                    osc.start(ctx.currentTime);
+                    osc.stop(ctx.currentTime + 0.1);
+                } else if (type === 'success') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(440, ctx.currentTime);
+                    osc.frequency.setValueAtTime(554.37, ctx.currentTime + 0.1);
+                    osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.2);
+                    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                    osc.start(ctx.currentTime);
+                    osc.stop(ctx.currentTime + 0.3);
+                }
+            } catch(e) {} // Ignore if browser blocks auto-play audio
+        }
+
+        /* =========================================
+           3. UI & STATE MANAGEMENT
+           ========================================= */
+        // Dark Mode Logic
+        const htmlEl = document.documentElement;
+        const btnTheme = document.getElementById('btn-theme-toggle');
+        const iconSun = document.getElementById('icon-sun');
+        const iconMoon = document.getElementById('icon-moon');
+        
+        function toggleTheme() {
+            if (htmlEl.classList.contains('dark')) {
+                htmlEl.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                iconSun.classList.add('hidden');
+                iconMoon.classList.remove('hidden');
+            } else {
+                htmlEl.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                iconMoon.classList.add('hidden');
+                iconSun.classList.remove('hidden');
+            }
+        }
+        
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            htmlEl.classList.add('dark');
+            iconMoon.classList.add('hidden');
+            iconSun.classList.remove('hidden');
+        }
+        btnTheme.addEventListener('click', toggleTheme);
 
         function showToast(message, isError = false) {
             const toast = document.getElementById('toast');
             document.getElementById('toast-msg').innerText = message;
-            toast.style.backgroundColor = isError ? '#ef4444' : '#374151';
+            toast.style.backgroundColor = isError ? '#ef4444' : (htmlEl.classList.contains('dark') ? '#374151' : '#1f2937');
             toast.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 4500);
+            setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 4000);
         }
 
         function switchView(viewId) {
-            ['view-home', 'view-waiting', 'view-chat'].forEach(id => {
-                document.getElementById(id).classList.add('hidden');
-            });
+            ['view-home', 'view-waiting', 'view-chat'].forEach(id => document.getElementById(id).classList.add('hidden'));
             document.getElementById(viewId).classList.remove('hidden');
         }
 
-        const savedState = sessionStorage.getItem('qrsync_state');
+        const savedState = sessionStorage.getItem('qrsync_state_v2');
         const defaultState = {
-            clientId: 'client_' + Math.random().toString(16).slice(2),
-            sessionId: null,
-            role: null,
-            isChatActive: false
+            clientId: 'cli_' + Math.random().toString(36).substr(2, 9),
+            sessionId: null, role: null, isChatActive: false, chatHistory: [] 
         };
         
         const AppState = savedState ? 
-            { ...defaultState, ...JSON.parse(savedState), mqttClient: null, topicSystem: '', topicChat: '', guestWaitingId: null } : 
-            { ...defaultState, mqttClient: null, topicSystem: '', topicChat: '', guestWaitingId: null };
+            { ...defaultState, ...JSON.parse(savedState), mqtt: null } : 
+            { ...defaultState, mqtt: null };
 
         function saveState() {
-            sessionStorage.setItem('qrsync_state', JSON.stringify({
-                clientId: AppState.clientId,
-                sessionId: AppState.sessionId,
-                role: AppState.role,
-                isChatActive: AppState.isChatActive
+            sessionStorage.setItem('qrsync_state_v2', JSON.stringify({
+                clientId: AppState.clientId, sessionId: AppState.sessionId,
+                role: AppState.role, isChatActive: AppState.isChatActive, chatHistory: AppState.chatHistory
             }));
         }
 
         function generateQR(sessionId) {
-            let currentUrl = window.location.href.split('?')[0];
-            let connectUrl = `${currentUrl}?session=${sessionId}`;
+            const connectUrl = `${window.location.href.split('?')[0]}?session=${sessionId}`;
             const qrContainer = document.getElementById("qrcode");
             qrContainer.innerHTML = '';
-            try {
-                new QRCode(qrContainer, {
-                    text: connectUrl, width: 180, height: 180,
-                    colorDark : "#1e1b4b", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H
-                });
-            } catch(e) { console.error("QR Gen Error", e); }
+            new QRCode(qrContainer, { text: connectUrl, width: 180, height: 180, colorDark: "#1e1b4b", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.H });
         }
 
-        function connectMQTT(callback, forcedBrokerIndex = null) {
-            if (typeof mqtt === 'undefined') {
-                callback(false, "System libraries failed to load. Please refresh.");
-                return;
-            }
-
-            if (AppState.mqttClient && AppState.mqttClient.connected) {
-                callback(true, null, forcedBrokerIndex !== null ? forcedBrokerIndex : 0);
-                return;
-            }
+        /* =========================================
+           4. MQTT NETWORK LOGIC
+           ========================================= */
+        function connectMQTT(callback, brokerIndex = 0) {
+            if (typeof mqtt === 'undefined') return callback(false, "System libraries failed to load.");
+            if (AppState.mqtt && AppState.mqtt.connected) return callback(true);
             
-            if (AppState.mqttClient) AppState.mqttClient.end();
-
-            // Reordered for better mobile stability (HiveMQ as primary)
-            const brokers = [
-                'wss://broker.hivemq.com:8443/mqtt',   // H: Index 0
-                'wss://broker.emqx.io:8084/mqtt',      // E: Index 1
-                'wss://test.mosquitto.org:8081/mqtt'   // M: Index 2
-            ];
+            if (AppState.mqtt) AppState.mqtt.end();
+            const brokers = ['wss://broker.hivemq.com:8443/mqtt', 'wss://broker.emqx.io:8084/mqtt', 'wss://test.mosquitto.org:8081/mqtt'];
             
-            let brokerIndex = forcedBrokerIndex !== null ? forcedBrokerIndex : 0;
             let isResolved = false;
 
-            function tryConnect() {
-                if (forcedBrokerIndex !== null && brokerIndex !== forcedBrokerIndex) {
-                    if (!isResolved) {
-                        isResolved = true;
-                        callback(false, "Could not reach the specific room server.");
-                    }
-                    return;
-                }
-
-                if (brokerIndex >= brokers.length) {
-                    if (!isResolved) {
-                        isResolved = true;
-                        callback(false, "Could not reach any server. Network might be blocking WebSockets.");
-                    }
-                    return;
-                }
-
-                const brokerUrl = brokers[brokerIndex];
+            function tryConnect(idx) {
+                if (idx >= brokers.length) return isResolved || (isResolved = true, callback(false, "Network blocks WebSockets."));
                 
                 try {
-                    const client = mqtt.connect(brokerUrl, {
-                        connectTimeout: 5000, 
-                        reconnectPeriod: 2000, // IMPORTANT: Auto-reconnect enabled for mobile browsers
-                        keepalive: 30
-                    });
-
-                    // Initial connection timeout fallback
-                    let timeoutTimer = setTimeout(() => {
-                        if (!client.connected && !isResolved) {
-                            client.end();
-                            brokerIndex++;
-                            tryConnect(); 
-                        }
-                    }, 5500);
+                    const client = mqtt.connect(brokers[idx], { connectTimeout: 4000, reconnectPeriod: 2000, keepalive: 30 });
+                    let timer = setTimeout(() => { if (!client.connected && !isResolved) { client.end(); tryConnect(idx + 1); } }, 4500);
 
                     client.on('connect', () => {
-                        clearTimeout(timeoutTimer);
+                        clearTimeout(timer);
                         if (!isResolved) {
                             isResolved = true;
-                            AppState.mqttClient = client;
-                            AppState.mqttClient.on('message', handleIncomingMessage);
-                            callback(true, null, brokerIndex); 
+                            AppState.mqtt = client;
+                            AppState.mqtt.on('message', handleIncomingMessage);
+                            callback(true, null, idx); 
                         }
                     });
-
-                    client.on('error', (err) => {
-                        // Only fallback if initial connection fails. If it fails later, reconnectPeriod handles it.
-                        if (!isResolved) {
-                            clearTimeout(timeoutTimer);
-                            client.end();
-                            brokerIndex++;
-                            tryConnect(); 
-                        }
-                    });
-
-                } catch (error) {
-                    if (!isResolved) {
-                        brokerIndex++;
-                        tryConnect(); 
-                    }
-                }
+                    client.on('error', () => { if (!isResolved) { clearTimeout(timer); client.end(); tryConnect(idx + 1); } });
+                } catch (e) { if (!isResolved) tryConnect(idx + 1); }
             }
-
-            tryConnect();
+            tryConnect(brokerIndex);
         }
 
-        function handleIncomingMessage(topic, message) {
+        async function handleIncomingMessage(topic, message) {
             let data;
-            try {
-                data = JSON.parse(message.toString());
-                if (!data || typeof data !== 'object') return;
-                if (typeof data.type !== 'string' || typeof data.senderId !== 'string') return;
-                
-                if (data.text && typeof data.text === 'string') {
-                    if (data.text.length > 2000) data.text = data.text.substring(0, 2000);
-                } else if (data.text) {
-                    return; 
-                }
-            } catch (e) { return; } 
+            try { data = JSON.parse(message.toString()); } catch (e) { return; }
+            if (data.senderId === AppState.clientId) return;
 
-            if (data.senderId === AppState.clientId && data.type !== 'chat') return;
+            const sysTopic = `qsys/${AppState.sessionId}`;
+            const chatTopic = `qchat/${AppState.sessionId}`;
 
-            if (topic === AppState.topicSystem) {
+            if (topic === sysTopic) {
                 if (AppState.role === 'host' && data.type === 'join_request') {
                     AppState.guestWaitingId = data.senderId;
                     showApprovalModal();
+                    playSound('msg');
                 } 
                 else if (AppState.role === 'guest' && data.type === 'join_response' && data.targetId === AppState.clientId) {
                     if (data.status === 'accepted') {
                         showToast("Connection Approved!");
+                        playSound('success');
                         startChat();
-                    } else {
-                        showToast("Host rejected the connection.", true);
-                        resetApp();
-                    }
+                    } else { showToast("Rejected.", true); resetApp(); }
                 }
-                else if (data.type === 'leave') {
-                    showToast("The other device disconnected.", true);
-                    resetApp();
+                else if (data.type === 'typing') {
+                    const ind = document.getElementById('typing-indicator');
+                    if (data.status === 'start') { ind.classList.remove('hidden'); }
+                    else { ind.classList.add('hidden'); }
                 }
+                else if (data.type === 'leave') { showToast("Other device disconnected.", true); resetApp(); }
             }
-            else if (topic === AppState.topicChat && data.type === 'chat') {
-                if (data.senderId !== AppState.clientId) {
-                    renderMessage(data.text, 'other');
+            else if (topic === chatTopic && data.type === 'chat') {
+                const ind = document.getElementById('typing-indicator');
+                ind.classList.add('hidden'); // hide typing when msg arrives
+                
+                // DECRYPT DATA
+                const decryptedStr = await decryptData(data.payload);
+                if (decryptedStr) {
+                    try {
+                        const parsedPayload = JSON.parse(decryptedStr);
+                        renderMessage(parsedPayload, 'other');
+                        playSound('msg');
+                    } catch(e) {} // Ignore malformed JSON
                 }
             }
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            if (AppState.sessionId && AppState.role) {
-                AppState.topicSystem = `secureqr/sys/${AppState.sessionId}`;
-                AppState.topicChat = `secureqr/chat/${AppState.sessionId}`;
-                
-                let bIndex = ['H', 'E', 'M'].indexOf(AppState.sessionId.charAt(0));
-                if (bIndex === -1) bIndex = 0;
+        /* =========================================
+           5. CHAT, MEDIA & CAMERA LOGIC
+           ========================================= */
+        async function sendEncryptedMessage(payloadObj) {
+            if (!AppState.mqtt || !cryptoKey) return;
+            const jsonStr = JSON.stringify(payloadObj);
+            const encryptedPayload = await encryptData(jsonStr);
+            if (encryptedPayload) {
+                const msg = { type: 'chat', senderId: AppState.clientId, payload: encryptedPayload };
+                AppState.mqtt.publish(`qchat/${AppState.sessionId}`, JSON.stringify(msg), { qos: 0 });
+                renderMessage(payloadObj, 'me');
+            }
+        }
 
+        function renderMessage(payload, senderType, shouldSave = true) {
+            const container = document.getElementById('chat-messages');
+            const wrapper = document.createElement('div');
+            wrapper.className = `flex w-full ${senderType === 'me' ? 'justify-end' : 'justify-start'} z-10 relative`;
+            
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `max-w-[75%] px-4 py-3 rounded-2xl text-sm shadow-sm break-words ${senderType === 'me' ? 'chat-bubble-me' : 'chat-bubble-other'}`;
+            
+            if (payload.type === 'text') {
+                msgDiv.textContent = payload.data;
+            } else if (payload.type === 'image') {
+                const img = document.createElement('img');
+                img.src = payload.data;
+                img.className = 'rounded-lg max-w-full h-auto mt-1 cursor-pointer';
+                img.onclick = () => {
+                    const w = window.open("");
+                    w.document.write(`<img src="${payload.data}" style="max-width:100%;">`);
+                };
+                msgDiv.appendChild(img);
+            }
+            
+            wrapper.appendChild(msgDiv);
+            container.appendChild(wrapper);
+            container.scrollTop = container.scrollHeight;
+
+            if (shouldSave) {
+                AppState.chatHistory.push({ payload, senderType });
+                saveState();
+            }
+        }
+
+        function loadChatHistory() {
+            const container = document.getElementById('chat-messages');
+            container.innerHTML = '<div class="text-center w-full"><span class="bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs px-3 py-1 rounded-full">Encrypted connection established.</span></div><div id="typing-indicator" class="hidden absolute bottom-2 left-6 bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-xs px-3 py-1.5 rounded-full flex items-center space-x-1"><span>Typing</span><span class="w-1 h-1 bg-gray-500 dark:bg-gray-400 rounded-full animate-bounce"></span><span class="w-1 h-1 bg-gray-500 dark:bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></span><span class="w-1 h-1 bg-gray-500 dark:bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.4s"></span></div>';
+            
+            AppState.chatHistory.forEach(item => renderMessage(item.payload, item.senderType, false));
+        }
+
+        // Image Attachment (Compress to Base64)
+        document.getElementById('btn-attach').addEventListener('click', () => document.getElementById('file-input').click());
+        document.getElementById('file-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 800;
+                    const scaleSize = MAX_WIDTH / img.width;
+                    canvas.width = MAX_WIDTH;
+                    canvas.height = img.height * scaleSize;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    // Compress as JPEG
+                    const base64Img = canvas.toDataURL('image/jpeg', 0.6); 
+                    sendEncryptedMessage({ type: 'image', data: base64Img });
+                }
+                img.src = event.target.result;
+            }
+            reader.readAsDataURL(file);
+            e.target.value = ''; // Reset
+        });
+
+        // HTML5 QR Scanner
+        let html5QrcodeScanner = null;
+        document.getElementById('btn-camera').addEventListener('click', () => {
+            if (typeof Html5Qrcode === 'undefined') return showToast("Scanner library not loaded.", true);
+            const container = document.getElementById('scanner-container');
+            if (container.classList.contains('hidden')) {
+                container.classList.remove('hidden');
+                html5QrcodeScanner = new Html5Qrcode("reader");
+                html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } }, 
+                (decodedText) => {
+                    // Send scanned data instantly!
+                    sendEncryptedMessage({ type: 'text', data: `[SCANNED]: ${decodedText}` });
+                    playSound('success');
+                    // auto close scanner after scan
+                    document.getElementById('btn-close-scanner').click();
+                }, (error) => {}).catch(err => {
+                    container.classList.add('hidden');
+                    showToast("Camera permission denied.", true);
+                });
+            }
+        });
+        document.getElementById('btn-close-scanner').addEventListener('click', () => {
+            if(html5QrcodeScanner) {
+                html5QrcodeScanner.stop().then(() => {
+                    document.getElementById('scanner-container').classList.add('hidden');
+                });
+            }
+        });
+
+        // Typing Indicator Logic
+        let typingTimer;
+        document.getElementById('input-chat').addEventListener('input', () => {
+            if(!AppState.mqtt) return;
+            AppState.mqtt.publish(`qsys/${AppState.sessionId}`, JSON.stringify({type: 'typing', senderId: AppState.clientId, status: 'start'}), {qos:0});
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(() => {
+                AppState.mqtt.publish(`qsys/${AppState.sessionId}`, JSON.stringify({type: 'typing', senderId: AppState.clientId, status: 'stop'}), {qos:0});
+            }, 1000);
+        });
+
+        /* =========================================
+           6. INITIALIZATION & EVENTS
+           ========================================= */
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Restore Session
+            if (AppState.sessionId && AppState.role) {
+                cryptoKey = await deriveKey(AppState.sessionId); // Re-derive key
+                let bIndex = ['H', 'E', 'M'].indexOf(AppState.sessionId.charAt(0));
+                
                 if (AppState.role === 'host') {
                     document.getElementById('display-session-code').innerText = AppState.sessionId;
                     generateQR(AppState.sessionId);
-                    document.getElementById('chat-role-text').innerText = "Room Host";
-                    switchView(AppState.isChatActive ? 'view-chat' : 'view-waiting');
+                    if (AppState.isChatActive) { switchView('view-chat'); loadChatHistory(); } 
+                    else { switchView('view-waiting'); }
                 } else {
                     document.getElementById('input-join-code').value = AppState.sessionId;
-                    document.getElementById('chat-role-text').innerText = "Guest";
-                    switchView(AppState.isChatActive ? 'view-chat' : 'view-home');
+                    if (AppState.isChatActive) { switchView('view-chat'); loadChatHistory(); } 
+                    else { switchView('view-home'); }
                 }
 
-                connectMQTT((success, errorMsg) => {
+                connectMQTT((success) => {
                     if (success) {
-                        // Switched to QoS: 0 to prevent public brokers from dropping packets
-                        AppState.mqttClient.subscribe(AppState.topicSystem, { qos: 0 });
+                        AppState.mqtt.subscribe(`qsys/${AppState.sessionId}`, { qos: 0 });
                         if (AppState.isChatActive) {
-                            AppState.mqttClient.subscribe(AppState.topicChat, { qos: 0 });
-                            showToast("Connection successfully recovered.");
+                            AppState.mqtt.subscribe(`qchat/${AppState.sessionId}`, { qos: 0 });
                         } else if (AppState.role === 'guest') {
-                            const req = { type: 'join_request', senderId: AppState.clientId };
-                            AppState.mqttClient.publish(AppState.topicSystem, JSON.stringify(req), { qos: 0 });
+                            AppState.mqtt.publish(`qsys/${AppState.sessionId}`, JSON.stringify({ type: 'join_request', senderId: AppState.clientId }), { qos: 0 });
                         }
-                    } else {
-                        showToast("Failed to recover connection: " + errorMsg, true);
-                        resetApp();
-                    }
-                }, bIndex);
+                    } else resetApp();
+                }, bIndex === -1 ? 0 : bIndex);
             } else {
-                const urlParams = new URLSearchParams(window.location.search);
-                const sessionFromUrl = urlParams.get('session');
+                const sessionFromUrl = new URLSearchParams(window.location.search).get('session');
                 if (sessionFromUrl) {
                     document.getElementById('input-join-code').value = sessionFromUrl;
-                    setTimeout(() => {
-                        document.getElementById('btn-join-room').click();
-                    }, 500); 
+                    setTimeout(() => document.getElementById('btn-join-room').click(), 500); 
                 }
             }
 
+            // Create Room
             const btnCreate = document.getElementById('btn-create-room');
             btnCreate.addEventListener('click', () => {
-                const originalContent = btnCreate.innerHTML;
-                btnCreate.innerHTML = '<span class="animate-pulse">Connecting...</span>';
+                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                let code = 'H'; // Always HiveMQ for primary creation
+                for (let i = 0; i < 6; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
+                
+                btnCreate.innerHTML = '<span class="animate-pulse">Securing Room...</span>';
                 btnCreate.disabled = true;
 
-                connectMQTT((success, errorMsg, bIndex) => {
-                    btnCreate.innerHTML = originalContent;
+                connectMQTT(async (success, errorMsg) => {
+                    btnCreate.innerHTML = '<span>Create Secure Room</span>';
                     btnCreate.disabled = false;
+                    if (!success) return showToast(errorMsg, true);
 
-                    if (!success) {
-                        showToast(errorMsg, true);
-                        return;
-                    }
-
-                    AppState.clientId = 'client_' + Math.random().toString(16).slice(2);
                     AppState.role = 'host';
-                    AppState.sessionId = generateSecureCode(bIndex);
+                    AppState.sessionId = code;
+                    cryptoKey = await deriveKey(code); // Generate Crypto Key
+                    
                     AppState.isChatActive = false;
-                    AppState.topicSystem = `secureqr/sys/${AppState.sessionId}`;
-                    AppState.topicChat = `secureqr/chat/${AppState.sessionId}`;
+                    AppState.chatHistory = [];
                     saveState(); 
 
-                    AppState.mqttClient.subscribe(AppState.topicSystem, { qos: 0 });
-
+                    AppState.mqtt.subscribe(`qsys/${AppState.sessionId}`, { qos: 0 });
                     document.getElementById('display-session-code').innerText = AppState.sessionId;
                     generateQR(AppState.sessionId);
-
-                    document.getElementById('chat-role-text').innerText = "Room Host";
                     switchView('view-waiting');
+                    playSound('success');
                 });
             });
 
+            // Join Room
             const btnJoin = document.getElementById('btn-join-room');
             btnJoin.addEventListener('click', () => {
                 const code = document.getElementById('input-join-code').value.trim().toUpperCase();
-                if (code.length !== 7) {
-                    showToast("Please enter a valid 7-character code.", true);
-                    return;
-                }
-
+                if (code.length !== 7) return showToast("Enter 7-character code.", true);
                 let bIndex = ['H', 'E', 'M'].indexOf(code.charAt(0));
-                if (bIndex === -1) {
-                    showToast("Invalid code format.", true);
-                    return;
-                }
-
-                const originalText = btnJoin.innerText;
+                
                 btnJoin.innerText = "Connecting...";
                 btnJoin.disabled = true;
                 
-                connectMQTT((success, errorMsg) => {
-                    if (!success) {
-                        btnJoin.innerText = originalText;
-                        btnJoin.disabled = false;
-                        showToast(errorMsg, true);
-                        return;
-                    }
+                connectMQTT(async (success, errorMsg) => {
+                    btnJoin.innerText = "Join Securely";
+                    btnJoin.disabled = false;
+                    if (!success) return showToast(errorMsg, true);
 
-                    AppState.clientId = 'client_' + Math.random().toString(16).slice(2);
                     AppState.role = 'guest';
                     AppState.sessionId = code;
+                    cryptoKey = await deriveKey(code); // Generate Crypto Key
+
                     AppState.isChatActive = false;
-                    AppState.topicSystem = `secureqr/sys/${AppState.sessionId}`;
-                    AppState.topicChat = `secureqr/chat/${AppState.sessionId}`;
+                    AppState.chatHistory = [];
                     saveState(); 
 
-                    AppState.mqttClient.subscribe(AppState.topicSystem, { qos: 0 }, (err) => {
-                        btnJoin.innerText = originalText;
-                        btnJoin.disabled = false;
+                    AppState.mqtt.subscribe(`qsys/${AppState.sessionId}`, { qos: 0 }, (err) => {
                         if(!err) {
-                            const req = { type: 'join_request', senderId: AppState.clientId };
-                            AppState.mqttClient.publish(AppState.topicSystem, JSON.stringify(req), { qos: 0 });
-                            showToast("Request sent, waiting for approval...");
-                        } else {
-                            showToast("Could not reach the room.", true);
-                        }
+                            AppState.mqtt.publish(`qsys/${AppState.sessionId}`, JSON.stringify({ type: 'join_request', senderId: AppState.clientId }), { qos: 0 });
+                            showToast("Request sent securely...");
+                        } else showToast("Cannot reach room.", true);
                     });
-                }, bIndex);
+                }, bIndex === -1 ? 0 : bIndex);
             });
 
             document.getElementById('btn-cancel-waiting').addEventListener('click', resetApp);
-            
-            document.getElementById('btn-copy-link').addEventListener('click', () => {
-                let currentUrl = window.location.href.split('?')[0];
-                let connectUrl = `${currentUrl}?session=${AppState.sessionId}`;
-                
-                if (navigator.clipboard && window.isSecureContext) {
-                    navigator.clipboard.writeText(connectUrl).then(() => {
-                        showToast("Connection link copied!");
-                    });
-                } else {
-                    const textArea = document.createElement("textarea");
-                    textArea.value = connectUrl;
-                    document.body.appendChild(textArea);
-                    textArea.select();
-                    try {
-                        document.execCommand('copy');
-                        showToast("Connection link copied!");
-                    } catch (err) {
-                        showToast("Failed to copy link.", true);
-                    }
-                    document.body.removeChild(textArea);
-                }
-            });
-
             document.getElementById('btn-leave-chat').addEventListener('click', () => {
-                if (AppState.mqttClient) {
-                    AppState.mqttClient.publish(AppState.topicSystem, JSON.stringify({ type: 'leave', senderId: AppState.clientId }), { qos: 0 });
-                }
+                if (AppState.mqtt) AppState.mqtt.publish(`qsys/${AppState.sessionId}`, JSON.stringify({ type: 'leave', senderId: AppState.clientId }), { qos: 0 });
                 resetApp();
             });
 
+            // Chat Submit
             document.getElementById('form-chat').addEventListener('submit', (e) => {
                 e.preventDefault();
                 const input = document.getElementById('input-chat');
                 const text = input.value.trim();
-                
-                if (text && AppState.mqttClient) {
-                    const msgObj = { type: 'chat', senderId: AppState.clientId, text: text };
-                    AppState.mqttClient.publish(AppState.topicChat, JSON.stringify(msgObj), { qos: 0 });
-                    
-                    renderMessage(text, 'me');
+                if (text) {
+                    sendEncryptedMessage({ type: 'text', data: text });
                     input.value = '';
                 }
             });
 
+            // Modal Approvals
             document.getElementById('btn-approve').addEventListener('click', () => {
-                respondToJoinRequest('accepted');
+                AppState.mqtt.publish(`qsys/${AppState.sessionId}`, JSON.stringify({ type: 'join_response', senderId: AppState.clientId, targetId: AppState.guestWaitingId, status: 'accepted' }), { qos: 0 });
                 closeApprovalModal();
+                playSound('success');
                 startChat();
             });
-
             document.getElementById('btn-reject').addEventListener('click', () => {
-                respondToJoinRequest('rejected');
+                AppState.mqtt.publish(`qsys/${AppState.sessionId}`, JSON.stringify({ type: 'join_response', senderId: AppState.clientId, targetId: AppState.guestWaitingId, status: 'rejected' }), { qos: 0 });
                 closeApprovalModal();
                 AppState.guestWaitingId = null;
             });
+            
+            // Copy Link
+            document.getElementById('btn-copy-link').addEventListener('click', () => {
+                const url = `${window.location.href.split('?')[0]}?session=${AppState.sessionId}`;
+                if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard.writeText(url).then(() => showToast("Copied!"));
+                } else {
+                    const ta = document.createElement("textarea"); ta.value = url; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); showToast("Copied!");
+                }
+            });
         });
-
-        function respondToJoinRequest(status) {
-            const res = { type: 'join_response', senderId: AppState.clientId, targetId: AppState.guestWaitingId, status: status };
-            AppState.mqttClient.publish(AppState.topicSystem, JSON.stringify(res), { qos: 0 });
-        }
 
         function startChat() {
             AppState.isChatActive = true;
             saveState(); 
-            AppState.mqttClient.subscribe(AppState.topicChat, { qos: 0 });
-            if(AppState.role === 'guest') {
-                document.getElementById('chat-role-text').innerText = "Guest";
-            }
+            AppState.mqtt.subscribe(`qchat/${AppState.sessionId}`, { qos: 0 });
             switchView('view-chat');
         }
 
         function resetApp() {
-            if (AppState.mqttClient) {
-                if(AppState.topicSystem) AppState.mqttClient.unsubscribe(AppState.topicSystem);
-                if(AppState.topicChat) AppState.mqttClient.unsubscribe(AppState.topicChat);
+            if (AppState.mqtt) {
+                if(AppState.sessionId) AppState.mqtt.unsubscribe(`qsys/${AppState.sessionId}`);
+                if(AppState.sessionId) AppState.mqtt.unsubscribe(`qchat/${AppState.sessionId}`);
             }
-            AppState.sessionId = null;
-            AppState.role = null;
-            AppState.isChatActive = false;
-            AppState.guestWaitingId = null;
+            AppState.sessionId = null; AppState.role = null; AppState.isChatActive = false; AppState.guestWaitingId = null; AppState.chatHistory = []; cryptoKey = null;
             saveState(); 
             
             document.getElementById('input-join-code').value = '';
-            document.getElementById('btn-join-room').innerText = "Join Room";
-            document.getElementById('chat-messages').innerHTML = '<div class="text-center w-full"><span class="bg-gray-200 text-gray-600 text-xs px-3 py-1 rounded-full">Connection established. Messages are isolated and secure.</span></div>';
-            
+            document.getElementById('btn-join-room').innerText = "Join Securely";
+            if(html5QrcodeScanner) document.getElementById('btn-close-scanner').click();
             switchView('view-home');
-        }
-
-        function renderMessage(text, senderType) {
-            const container = document.getElementById('chat-messages');
-            const wrapperDiv = document.createElement('div');
-            const msgDiv = document.createElement('div');
-            
-            wrapperDiv.className = `flex w-full ${senderType === 'me' ? 'justify-end' : 'justify-start'}`;
-            msgDiv.className = `max-w-[75%] px-4 py-3 rounded-2xl text-sm shadow-sm break-words ${senderType === 'me' ? 'chat-bubble-me' : 'chat-bubble-other'}`;
-            
-            msgDiv.textContent = text;
-            
-            wrapperDiv.appendChild(msgDiv);
-            container.appendChild(wrapperDiv);
-            container.scrollTop = container.scrollHeight;
         }
 
         function showApprovalModal() {
             document.getElementById('waiting-spinner').classList.add('hidden');
             const area = document.getElementById('area-room-permission');
             area.classList.remove('hidden');
-            setTimeout(() => {
-                area.classList.remove('opacity-0', 'scale-95');
-                area.classList.add('opacity-100', 'scale-100');
-            }, 10);
+            setTimeout(() => { area.classList.remove('opacity-0', 'scale-95'); area.classList.add('opacity-100', 'scale-100'); }, 10);
         }
 
         function closeApprovalModal() {
@@ -595,12 +728,9 @@
             area.classList.add('opacity-0', 'scale-95');
             setTimeout(() => {
                 area.classList.add('hidden');
-                if (!AppState.isChatActive) {
-                    document.getElementById('waiting-spinner').classList.remove('hidden');
-                }
+                if (!AppState.isChatActive) document.getElementById('waiting-spinner').classList.remove('hidden');
             }, 300);
         }
-
     </script>
 </body>
 </html>
